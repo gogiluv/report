@@ -1,0 +1,150 @@
+.work-list table tbody tr td {
+    height: 100px;
+}
+.work-list table tbody tr td:nth-of-type(-n+2), .work-list table tbody tr td:last-child,
+.pr-list table tbody tr td:nth-of-type(-n+2), .pr-list table tbody tr td:last-child,
+.sp-list table tbody tr td:nth-of-type(n+2), .rs-list table tbody tr td:not(:nth-last-child(2)){
+    text-align: center;
+}
+.work-list table tbody tr textarea, .pr-list table tbody tr textarea, .rs-list table tbody tr textarea{
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: 0px;
+}
+.work-list table tbody tr textarea:focus, .create-area input:focus, .select-area input:focus, 
+.pr-list table tbody tr textarea:focus, .work-list input[type="number"] {
+    outline: none;
+}
+.create-area input[type="number"], .create-area input[type="text"], .create-area select, .work-list select, .work-list input[type="number"],
+.select-area select, .select-area input:not([type="button"]) {
+    border: 0px;
+    border-bottom: 1px solid lightgray;
+    padding: 0px; 
+    font-size: 13px;
+    text-align-last:center;
+}
+.create-area input[type="text"], .select-area input[type="text"] {
+    width: 80px;
+    text-align: center;
+}
+.create-area input[type="number"], .work-list input[type="number"] {
+    width: 50px;
+    text-align: right;
+}
+.create-area label, .select-area label {
+    padding: 5px 5px 5px 15px;
+    vertical-align: middle;
+}
+.summary-area {
+    padding-top: 50px;
+    width: 800px;
+    margin: auto;
+    text-align: center;
+    vertical-align: bottom;
+}
+.preview-scroll-auto {
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    overflow: auto;    
+}
+
+.preview-scroll-hidden {
+    white-space: pre-line;
+    text-overflow: ellipsis;
+    overflow: hidden;    
+}
+.rs-list, .pr-list, .work-list, .sp-list {
+    max-height: 800px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-top: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+.tabcontents div:nth-of-type(1) {
+    width: 450px;
+}
+.tabcontents div:nth-of-type(1) input[type="text"]{
+    width: 200px !important;    
+}
+.tabcontents div:nth-of-type(2) {
+    width: 800px;
+    max-height: 800px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-top: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+.tabcontents table tbody tr td{
+    text-align: center;
+}
+/*
+    padding, height, etc....
+*/
+.pt-20 {
+    padding-top: 20px;
+}
+.mt-20 {
+    margin-top: 20px;
+}
+.mh-200 {
+    max-height: 200px;
+}
+.btn {
+    cursor: pointer;
+}
+.btn:hover {
+    background-color: lightgray;
+}
+.expand-btn {
+    float:right;
+    position:relative;
+}
+.mt-10 {
+    margin-top: 10px;
+}
+.overlay {
+    display:none;
+    width:100%; 
+    height:100%; 
+    top:0; 
+    left:0;
+    background: rgba(0, 0, 0, 0.1);
+    position:absolute; 
+    z-index:1000;
+}
+.modal-div {
+    margin: auto;
+    background-color: white;
+    border-radius: 20px;
+    border: 1px solid lightgray;
+    position: fixed;
+    width: 600px;
+    min-height: 200px;    
+    top:14%;
+    left:26%;
+    padding: 10px;
+}
+.modal-close {
+    float:right;
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    cursor: pointer;
+}
+.modal-close:hover {
+    background-color: lightgray;
+}
+.modal-header {
+    margin: auto;
+    margin-top: 20px;
+    padding: 5px 10px;
+    border-bottom: 1px solid lightgray;
+}
+.modal-content {
+    margin: auto;
+    padding: 10px;
+    max-height: 500px;    
+    overflow: auto;
+    white-space: pre-wrap;    
+}
