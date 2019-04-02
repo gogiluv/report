@@ -45,7 +45,6 @@
 
 <div class="C2Scontent">
 	<h1 class="location">관리메뉴 > 주간 보고(일별)</h1>
-	<h2 class="mtit">일간 보고 페이지 개발중</h2>
   <div>
     <div class="boardtype2" style="width:auto; max-width:1500px;">
       <div class="create-area">

@@ -3,7 +3,7 @@
   //get
   if(!empty($_GET)){
     $f_name = $_GET["f_name"];
-    $data = $_GET["data"];
+    $data = isset($_GET["data"]) ? $_GET["data"] : null;
 				
 		echo call_user_func($f_name, $data);
     return;
@@ -12,7 +12,7 @@
 	//post
 	if(!empty($_POST)){
     $f_name = $_GET["f_name"];
-    $data = $_GET["data"];
+    $data = isset($_GET["data"]) ? $_GET["data"] : null;
 				
 		echo call_user_func($f_name, $data);
     return;
@@ -27,7 +27,10 @@
 
     $reportIdx = $data["reportIdx"];
 
-		$sql = sprintf("SELECT * FROM ECO_Reports WHERE reportIdx=%d", $reportIdx);
+		$sql = sprintf("SELECT er.ReportIdx, er.MemberIdx, er.work_d, er.work_h, er.ProjectIdx, er.create_dt, er.Report, ep.ProjectName FROM ECO_Reports as er
+                    inner join ECO_Project as ep
+                    on  er.projectidx = ep.projectidx
+                    WHERE reportIdx=%d", $reportIdx);
     
     $result = mysqli_query($link, $sql);
     if(!$result) $result = mysqli_error($link);
@@ -151,6 +154,29 @@
     }
 
 		mysqli_close($link);    
+    return json_encode(array("result"=>$result));
+  }
+
+  function updateReport($data){
+    $link = DBConnect();
+
+		$memberIdx = $_SESSION['report_login_userIdx'];    
+    
+		/*
+		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
+		*/		
+		   
+	  $sql = sprintf("UPDATE ECO_Reports SET work_h=%f, projectidx=%d, report='%s' 
+                    where reportidx=%d and memberidx=%d", 
+                    $data["work_hour"], $data["project_id"], 
+                    @addslashes($data["content"]), $data["report_id"], $memberIdx);		
+		
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
     return json_encode(array("result"=>$result));
   }
 ?>

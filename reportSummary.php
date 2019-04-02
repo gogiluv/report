@@ -174,9 +174,9 @@
         html.push('</td>');
         html.push('</tr>');        
         list.append(html.join(''));
-
-        parent.fncResizeHeight(document);	//resize
-			}			
+      }		
+      RS.sum_work_h();	
+      parent.fncResizeHeight(document);	//resize
     },
     
 		deleteRow: function(id){
@@ -236,6 +236,38 @@
     },
     expandModalClose: function(){
       $('.overlay').hide();
+    },
+    sum_work_h: function(){
+      //console.log($('tr[data-member-name]').attr('data-member-name'),' : ',$('tr[data-member-name]').length);
+      var rows = $('tr[data-member-name]');
+      var member_data = {};
+      //console.log($(rows[0]).attr('data-member-name'));
+      for(var i=0; i<rows.length; i++) {
+        var row = rows[i];
+        if(member_data[$(row).attr('data-member-name')]){
+          member_data[$(row).attr('data-member-name')] += Number($(row).find('td[data-work-h]').text());
+        }else{
+          member_data[$(row).attr('data-member-name')] = Number($(row).find('td[data-work-h]').text());
+        }
+      }
+      console.log(member_data);
+      var members = Object.keys(member_data);
+      for(var i in members) {        
+        var html = [];        
+        html.push('<tr class="sum-row" data-member-name='+members[i]+'>');
+        html.push('<td>근무시간 합계</td>');
+        html.push('<td>');
+        html.push(member_data[members[i]]);
+        html.push('</td>');
+        html.push('<td colspan=3></td>')
+        html.push('</tr>');
+        
+        $('tr[data-member-name='+members[i]+']:last').after(html.join(''));
+        
+        var row_count = $('tr[data-member-name='+members[i]+']:first th').attr('rowspan');
+        console.log(row_count);
+        $('tr[data-member-name='+members[i]+']:first th').attr('rowspan', Number(row_count)+1);
+      }
     }
 	}
   

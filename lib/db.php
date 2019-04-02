@@ -286,7 +286,7 @@
 										INNER JOIN ECO_Project as ep ON er.projectidx=ep.projectidx 
 										INNER JOIN ECO_Member as em ON er.memberidx=em.memberidx
 										WHERE er.work_d between '%s' and '%s' %s
-										order by em.membername asc, er.work_d desc", 
+										order by em.membername asc, er.work_d asc", 
 										$data['from'], $data['to'], $member_sql);
     
     $result = mysqli_query($link, $sql);

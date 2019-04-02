@@ -65,9 +65,9 @@
             <tr>
 							<th width="10%">업무일자</th>
 							<th width="10%">근무 시간</th>
-              <th width="20%">유형</th>
+              <th width="18%">유형</th>
 							<th width="*">내용</th>              
-							<th width="10%">비고</th>
+							<th width="12%">비고</th>
             </tr>            
           </thead>
           <tbody>
@@ -88,6 +88,8 @@
 </div>
 <script type="text/javascript">
 	var PR = {
+    projects : {},
+      
     getToday: function(){
       return Date.now();
 		},
@@ -139,8 +141,9 @@
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+row.reportidx+')"></div>');
 				html.push(row.report);
 				html.push('</td>');
-				html.push('<td>');
-				html.push('<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+row.reportidx+')">');
+        html.push('<td>');
+        html.push('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+row.reportidx+')">');
+        html.push('<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+row.reportidx+')">');
 				html.push('</td>');				
         html.push('</tr>');
         list.append(html.join(''));
@@ -202,6 +205,130 @@
     },
     expandModalClose: function(){
       $('.overlay').hide();
+    },
+    modifyForm: function(id){
+      var row = $('tr[data-report-id='+id+']');
+      var data = {
+        reportIdx: id        
+      }
+      Report.get("getReportFromId", data).then(function(res){
+        var json_res = null;
+        try {
+          json_res = JSON.parse(res);
+        } catch (e) {
+          console.log(e);
+          console.log(res);
+          return;
+				}
+				if(json_res==null || json_res.error){
+					console.log(json_res);
+					return;
+        }
+        $(row).find('td:eq(0)').html('<input type="number" id="work-hour" value="'+json_res.work_h+'" step="0.01" min="0" max="24" onchange=""/>');
+        $(row).find('td:eq(1)').html(PR.getProjectSelectHtml(json_res.ProjectIdx));
+        $(row).find('td:eq(2)').css('height', '100px');
+        $(row).find('td:eq(2)').html('<textarea placeholder="write here...">'+json_res.Report+'</textarea>');
+        $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="확인" onclick="PR.modifyConfirm('+id+')">'
+          +'<input type="button" class="button red" value="취소" onclick="PR.resetForm('+id+')">');        
+      });
+    },
+    modifyConfirm: function(id) {
+      var row = $('tr[data-report-id='+id+']');      
+      var data = {
+        report_id: id,
+        work_hour: Number($(row).find('td:first input[type="number"]').val()),
+        project_id: $(row).find('td:eq(1) > select option:selected').val(),
+        content: $(row).find('textarea').val()
+      }
+      Report.get("updateReport", data).then(function(res){
+        var json_res = null;
+        try {
+          json_res = JSON.parse(res);
+        } catch (e) {
+          console.log(e);
+          console.log(res);
+          return;
+				}
+				if(json_res==null || json_res.error){
+					console.log(json_res);
+					return;
+        }
+
+        // 업데이트 후 해당 항목 불러옴
+        // 성공체크
+        if(json_res.result){
+          PR.resetForm(id);
+        }
+      });
+    },
+    resetForm: function(id) {
+      var row = $('tr[data-report-id='+id+']');
+      var data = {
+        reportIdx: id        
+      }
+      Report.get("getReportFromId", data).then(function(res){
+        var json_res = null;
+        try {
+          json_res = JSON.parse(res);
+        } catch (e) {
+          console.log(e);
+          console.log(res);
+          return;
+				}
+				if(json_res==null || json_res.error){
+					console.log(json_res);
+					return;
+        }
+        
+        $(row).find('td:eq(0)').text(Number(json_res.work_h));
+        $(row).find('td:eq(1)').text(json_res.ProjectName);
+        $(row).find('td:eq(2)').css('height', '');
+        $(row).find('td:eq(2)').html(
+          '<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+json_res.ReportIdx+')"></div>'
+          + json_res.Report
+        );        
+        $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+json_res.ReportIdx+')">'
+          + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+json_res.ReportIdx+')">');        
+      });
+    },
+
+    getProjectSelectHtml: function(projectIdx) {
+      var rows = PR.projects;
+      var html = [];
+      
+      html.push('<select>');
+
+      for(var num in rows){
+        if(rows[num].ProjectIdx===projectIdx){
+          html.push('<option value="'+rows[num].ProjectIdx+'" selected>');
+        }else{
+          html.push('<option value="'+rows[num].ProjectIdx+'">');        }
+        
+        html.push(rows[num].ProjectName);
+        html.push('</option>');
+      }
+
+      html.push('<select>');
+
+      return html.join('');
+    },
+
+    setProjects: function(){
+      Report.get("getProjects").then(function(res){
+        var json_res = null;
+        try {
+          json_res = JSON.parse(res);
+        } catch (e) {
+          console.log(e);
+          console.log(res);
+          return;
+        }
+				if(json_res==null || json_res.error){
+					console.log(json_res);
+					return;
+        }        
+        PR.projects = json_res;
+      });
     }
 	}
   
@@ -256,6 +383,7 @@
     }
     
     PR.search();
+    PR.setProjects();
   });
 </script>
 </body>
