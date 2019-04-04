@@ -15,14 +15,6 @@
 		echo $result;
     return;
 	}
-	//post
-	if(!empty($_POST)){
-    $data = $_POST;
-		$result = deleteReport(null, $data);
-		
-		echo $result;
-    return;
-  }
 
   //팀원 list
   $members = getMemberAll(null);
@@ -176,58 +168,15 @@
       RS.sumWorkHour();	
       parent.fncResizeHeight(document);	//resize
     },
-    
-		deleteRow: function(id){
-      // TODO: 필요한지 확인 해야함      
-			var chk = confirm('삭제하시겠습니까?');
-      
-      if(!chk){return;}
-
-			var data = {
-				reportIdx: id
-			}
-
-			$.post('reportSummary.php', data, function(res){
-				var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
-        RS.search();
-			})
-    },
     expandReport: function(id){
       var data = {
         reportIdx: id        
       }
       Report.get("getReportFromId", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
-        RS.expandModalOpen(json_res);
+        RS.expandModalOpen(res);
       });
-      // $.get('lib/api.php', data, function(res){
-      //   console.log(res);
-      // });
     },
     expandModalOpen: function(report){
-      console.log(report);
       $('.modal-header').text('보고일: '+ report.work_d);
       $('.modal-content').text(report.Report);
       $('.overlay').show();
@@ -269,19 +218,7 @@
     
     setMemeberSelect: function(){
       Report.get("getMembersForSummary").then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }        
-        return json_res;        
+        return res;        
       }).then(function(data){
         var html = [];
         html.push('<option value="">All</option>');

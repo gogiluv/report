@@ -99,7 +99,6 @@
 
  var PM = {
   renderRow: function(rows, tab_name){
-    console.log('renderRow');
     var list = $('.tabcontents.'+tab_name+' tbody');
     var html = [];
     for(var num in rows){
@@ -148,19 +147,7 @@
       is_enabled: status
     }
     Report.get("setProjectStatusChange", data).then(function(res){
-      var json_res = null;
-      try {
-        json_res = JSON.parse(res);
-      } catch (e) {
-        console.log(e);
-        console.log(res);
-        return;
-      }
-      if(json_res==null || json_res.error){        
-        console.log(json_res);
-        return;
-      }
-      if(json_res.result){
+      if(res && res.result){
         alert('변경되었습니다.');
       }else{
         alert('변경실패 관리자에게 문의해주세요.');
@@ -174,20 +161,8 @@
       isGame: 1,
       projectName: projectName
     }
-    Report.get("createProject", data).then(function(res){
-      var json_res = null;
-      try {
-        json_res = JSON.parse(res);
-      } catch (e) {
-        console.log(e);
-        console.log(res);
-        return;
-      }
-      if(json_res==null || json_res.error){        
-        console.log(json_res);
-        return;
-      }
-      if(json_res.result){
+    Report.get("createProject", data).then(function(res){     
+      if(res && res.result){
         alert('생성되었습니다.');
       }else{
         alert('생성실패 관리자에게 문의해주세요.');
@@ -204,19 +179,7 @@
     }
 
     Report.get("createProject", data).then(function(res){
-      var json_res = null;
-      try {
-        json_res = JSON.parse(res);
-      } catch (e) {
-        console.log(e);
-        console.log(res);
-        return;
-      }
-      if(json_res==null || json_res.error){        
-        console.log(json_res);
-        return;
-      }
-      if(json_res.result){
+      if(res && res.result){
         alert('생성되었습니다.');
       }else{
         alert('생성실패 관리자에게 문의해주세요.');
@@ -236,39 +199,21 @@
 
 		switch(tab_name) {
 			case 'game':
-        Report.get("getGameProjects").then(function(res){
-          var json_res = null;
-          try {
-            json_res = JSON.parse(res);
-          } catch (e) {
-            console.log(e);
-            console.log(res);
-            return;
-          }
-          if(json_res==null || json_res.error){
+        Report.get("getGameProjects").then(function(res){          
+          if(res==null){
             alert('프로젝트 목록이 없습니다.');
-            console.log(json_res);
             return;
           }
-          PM.renderRow(json_res, "game");
+          PM.renderRow(res, "game");
         });
 				break;
 			case 'etc':
         Report.get("getEtcProjects").then(function(res){
-          var json_res = null;
-          try {
-            json_res = JSON.parse(res);
-          } catch (e) {
-            console.log(e);
-            console.log(res);
-            return;
-          }
-          if(json_res==null || json_res.error){
+          if(res==null){
             alert('프로젝트 목록이 없습니다.');
-            console.log(json_res);
             return;
           }
-          PM.renderRow(json_res, "etc");
+          PM.renderRow(res, "etc");
         });
 				break;
 			case 'platform':

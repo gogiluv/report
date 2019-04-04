@@ -8,27 +8,55 @@ var Report = {
         f_name: f,
         data: d
       }
-      
       $.get('lib/api.php', req_data, function (res) {
         // 데이터를 받으면 resolve() 호출        
         if (res) {
-          resolve(res);
+          var json_res = null;
+          try {
+            json_res = JSON.parse(res);
+          } catch (e) {
+            alert('관리자에게 문의 해 주세요:' + e);
+            console.log(e);
+            console.log(res);
+            return;
+          }
+          //세션 만료 체크
+          if(json_res && json_res.error==='SESSION_EXPIRED'){
+            alert('세션이 만료되었습니다. 로그인 페이지로 이동합니다.');
+            parent.location.href="index.php";
+            return;
+          }
+          resolve(json_res);
         }
         reject(new Error("Request is failed"));
       });
     });
   },
-  alert: function(f, d) {
+  post: function(f, d) {
     return new Promise(function (resolve, reject) {
       var req_data = {
         f_name: f,
         data: d
       }
-      
       $.post('lib/api.php', req_data, function (res) {
-        // 데이터를 받으면 resolve() 호출
-        if (res) {  
-          resolve(res);
+        // 데이터를 받으면 resolve() 호출        
+        if (res) {
+          var json_res = null;
+          try {
+            json_res = JSON.parse(res);
+          } catch (e) {
+            alert('관리자에게 문의 해 주세요:' + e);
+            console.log(e);
+            console.log(res);
+            return;
+          }
+          //세션 만료 체크
+          if(json_res.error && json_res.error==='SESSION_EXPIRED'){
+            alert('세션이 만료되었습니다. 로그인 페이지로 이동합니다.');
+            parent.location.href="index.php";
+            return;
+          }
+          resolve(json_res);
         }
         reject(new Error("Request is failed"));
       });

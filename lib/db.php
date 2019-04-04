@@ -88,92 +88,92 @@
 		return $result;
 	}
 	
-	function getStatisticsProject($link, $memberIdx, $year, $month){
-		if(SessionCheck() == false) {
-			echo json_encode(array(error=>"session was terminated"));
-			return;
-		}
+	// function getStatisticsProject($link, $memberIdx, $year, $month){
+	// 	if(SessionCheck() == false) {
+	// 		echo json_encode(array("error"=>"SESSION_EXPIRED"));
+	// 		return;
+	// 	}
 		
-		if(is_null($link)){ $link = DBConnect();}
+	// 	if(is_null($link)){ $link = DBConnect();}
 
-		$date_sql = '';
-		$member_sql = '';
-		$level = $_SESSION["report_login_level"];
+	// 	$date_sql = '';
+	// 	$member_sql = '';
+	// 	$level = $_SESSION["report_login_level"];
 		
-		if($level<3) {
-			$memberIdx = $_SESSION['report_login_userIdx'];
-		}
+	// 	if($level<3) {
+	// 		$memberIdx = $_SESSION['report_login_userIdx'];
+	// 	}
 
-		if(!empty($year) && !empty($month)) {
-			$date_sql = "having year='$year' and month='$month'";
-		} else if(!empty($year)) {
-			$date_sql = "having year='$year'";
-		} else if(!empty($month)) {
-			echo isset($month);
-			$date_sql = "having year='$month'";
-		}
+	// 	if(!empty($year) && !empty($month)) {
+	// 		$date_sql = "having year='$year' and month='$month'";
+	// 	} else if(!empty($year)) {
+	// 		$date_sql = "having year='$year'";
+	// 	} else if(!empty($month)) {
+	// 		echo isset($month);
+	// 		$date_sql = "having year='$month'";
+	// 	}
 
-		if(!empty($memberIdx)){
-			$member_sql = "where memberidx=$memberIdx ";
-		}
+	// 	if(!empty($memberIdx)){
+	// 		$member_sql = "where memberidx=$memberIdx ";
+	// 	}
 
-		$sql = "SELECT er.projectidx, year(er.work_d) as year, month(er.work_d) as month, 
-		sum(er.work_h) as hour, ep.projectname 
-		from ECO_Reports as er 
-		inner join ECO_Project as ep on er.projectidx = ep.ProjectIdx 
-		$member_sql 
-		group by projectidx, year, month, projectname 
-		$date_sql 
-		order by year desc, month desc, projectidx asc";
-		//having year='$year' and month='$month'  
-		$result = mysqli_query($link, $sql) or die(mysqli_error($link));
+	// 	$sql = "SELECT er.projectidx, year(er.work_d) as year, month(er.work_d) as month, 
+	// 	sum(er.work_h) as hour, ep.projectname 
+	// 	from ECO_Reports as er 
+	// 	inner join ECO_Project as ep on er.projectidx = ep.ProjectIdx 
+	// 	$member_sql 
+	// 	group by projectidx, year, month, projectname 
+	// 	$date_sql 
+	// 	order by year desc, month desc, projectidx asc";
+	// 	//having year='$year' and month='$month'  
+	// 	$result = mysqli_query($link, $sql) or die(mysqli_error($link));
 
-		mysqli_close($link);		
-		return mysqli_result_to_json($result);
-  }
+	// 	mysqli_close($link);		
+	// 	return mysqli_result_to_json($result);
+  // }
   
-  function getStatisticsProject_bak($link, $memberIdx, $year, $month){
-		if(is_null($link)){ $link = DBConnect();}
+  // function getStatisticsProject_bak($link, $memberIdx, $year, $month){
+	// 	if(is_null($link)){ $link = DBConnect();}
 
-		$date_sql = '';
-		$member_sql = '';
+	// 	$date_sql = '';
+	// 	$member_sql = '';
 
-		if(!empty($year) && !empty($month)) {
-			$date_sql = "having year='$year' and month='$month'";
-		} else if(!empty($year)) {
-			$date_sql = "having year='$year'";
-		} else if(!empty($month)) {
-			echo isset($month);
-			$date_sql = "having year='$month'";
-		}
+	// 	if(!empty($year) && !empty($month)) {
+	// 		$date_sql = "having year='$year' and month='$month'";
+	// 	} else if(!empty($year)) {
+	// 		$date_sql = "having year='$year'";
+	// 	} else if(!empty($month)) {
+	// 		echo isset($month);
+	// 		$date_sql = "having year='$month'";
+	// 	}
 
-		if(!empty($memberIdx)){
-			$member_sql = "where memberidx=$memberIdx ";
-		}
+	// 	if(!empty($memberIdx)){
+	// 		$member_sql = "where memberidx=$memberIdx ";
+	// 	}
 
-		$sql = "SELECT projectidx, year, month, sum(work_h) as hour, projectname from
-		(SELECT ern.projectidx, year(ern.work_d) as year, month(ern.work_d) as month, 
-		sum(ern.work_h) as work_h, ep.projectname 
-		from ECO_Reports_New as ern 
-		inner join ECO_Project as ep on ern.projectidx = ep.ProjectIdx 
-		$member_sql 
-		group by projectidx, year, month, projectname 
-		union all 
-		SELECT er.projectidx, year(er.work_d) as year, month(er.work_d) as month, 
-		sum(er.work_h) as work_h, ep.projectname 
-		from ECO_Reports as er 
-		inner join ECO_Project as ep on er.projectidx = ep.ProjectIdx 
-		$member_sql 
-		group by projectidx, year, month, projectname) as t 
-		group by projectidx, year, month, projectname 
-		$date_sql 
-		order by year desc, month desc, projectidx asc";
-		//having year='$year' and month='$month'  
-		$result = mysqli_query($link, $sql) or die(mysqli_error($link));
+	// 	$sql = "SELECT projectidx, year, month, sum(work_h) as hour, projectname from
+	// 	(SELECT ern.projectidx, year(ern.work_d) as year, month(ern.work_d) as month, 
+	// 	sum(ern.work_h) as work_h, ep.projectname 
+	// 	from ECO_Reports_New as ern 
+	// 	inner join ECO_Project as ep on ern.projectidx = ep.ProjectIdx 
+	// 	$member_sql 
+	// 	group by projectidx, year, month, projectname 
+	// 	union all 
+	// 	SELECT er.projectidx, year(er.work_d) as year, month(er.work_d) as month, 
+	// 	sum(er.work_h) as work_h, ep.projectname 
+	// 	from ECO_Reports as er 
+	// 	inner join ECO_Project as ep on er.projectidx = ep.ProjectIdx 
+	// 	$member_sql 
+	// 	group by projectidx, year, month, projectname) as t 
+	// 	group by projectidx, year, month, projectname 
+	// 	$date_sql 
+	// 	order by year desc, month desc, projectidx asc";
+	// 	//having year='$year' and month='$month'  
+	// 	$result = mysqli_query($link, $sql) or die(mysqli_error($link));
 
-		mysqli_close($link);		
-		return mysqli_result_to_json($result);
-	}
+	// 	mysqli_close($link);		
+	// 	return mysqli_result_to_json($result);
+	// }
 	
 	function mysqli_result_to_json($result){
 		try {
@@ -188,31 +188,31 @@
 		}		
 	}
 
-	function insertReport($link, $data){
-    if(is_null($link)){ $link = DBConnect();}
+	// function insertReport($link, $data){
+  //   if(is_null($link)){ $link = DBConnect();}
 
-		$memberIdx = $_SESSION['report_login_userIdx'];    
+	// 	$memberIdx = $_SESSION['report_login_userIdx'];    
     
-		$sql = "INSERT INTO ECO_Reports (memberidx, work_d, work_h, projectidx, report, iscomplete) values ";
+	// 	$sql = "INSERT INTO ECO_Reports (memberidx, work_d, work_h, projectidx, report, iscomplete) values ";
 	
-		/*
-		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
-		row가 여러개니 벌크로 insert 한다
-		위의 이유로 sprint로 sql을 만들어서 쿼리한다
-		*/
-		$str_format = "(%d, '%s', %f, %d, '%s', 1), ";
-		foreach($data as $row){      
-		  $sql .= sprintf($str_format,$memberIdx, $row["work_date"], $row["work_hour"], $row["project_id"], @addslashes($row["content"]));
-		}
-		$sql = substr($sql, 0, strlen($sql) - 2);  
-    $result = mysqli_query($link, $sql);
+	// 	/*
+	// 	싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
+	// 	row가 여러개니 벌크로 insert 한다
+	// 	위의 이유로 sprint로 sql을 만들어서 쿼리한다
+	// 	*/
+	// 	$str_format = "(%d, '%s', %f, %d, '%s', 1), ";
+	// 	foreach($data as $row){      
+	// 	  $sql .= sprintf($str_format,$memberIdx, $row["work_date"], $row["work_hour"], $row["project_id"], @addslashes($row["content"]));
+	// 	}
+	// 	$sql = substr($sql, 0, strlen($sql) - 2);  
+  //   $result = mysqli_query($link, $sql);
 
-    //mysql error
-    if(!$result) $result = mysqli_error($link);
+  //   //mysql error
+  //   if(!$result) $result = mysqli_error($link);
 
-    mysqli_close($link);
-    return json_encode(array("result"=>$result));
-  }
+  //   mysqli_close($link);
+  //   return json_encode(array("result"=>$result));
+  // }
 
   function insertReport_bak($link, $data){
     if(is_null($link)){ $link = DBConnect();}
@@ -237,39 +237,45 @@
     return json_encode(array("result"=>$result));
   }
   
-  function getReportsFromDate($link, $data){
-    if(is_null($link)){ $link = DBConnect();}
+  // function getReportsFromDate($link, $data){
+	// 	if(empty($_SESSION['report_login_user'])) {
+	// 		echo json_encode(array("error"=>"SESSION_EXPIRED"));			
+	// 		return;
+	// 		exit();
+	// 	}
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+  //   if(is_null($link)){ $link = DBConnect();}
 
-    $sql = sprintf("SELECT er.reportidx, er.memberidx, er.work_d, er.work_h, er.report, ep.projectname 
-                  FROM ECO_Reports as er INNER JOIN ECO_Project as ep
-                  ON er.projectidx=ep.projectidx 
-                  WHERE er.work_d between '%s' and '%s' and er.memberidx=%d 
-                  order by er.work_d desc", 
-                  $data['from'], $data['to'], $memberIdx);
+  //   $memberIdx = $_SESSION['report_login_userIdx'];
 
-    $result = mysqli_query($link, $sql);
+  //   $sql = sprintf("SELECT er.reportidx, er.memberidx, er.work_d, er.work_h, er.report, ep.projectname 
+  //                 FROM ECO_Reports as er INNER JOIN ECO_Project as ep
+  //                 ON er.projectidx=ep.projectidx 
+  //                 WHERE er.work_d between '%s' and '%s' and er.memberidx=%d 
+  //                 order by er.work_d desc", 
+  //                 $data['from'], $data['to'], $memberIdx);
 
-    if(!$result) $result = mysqli_error($link);
+  //   $result = mysqli_query($link, $sql);
 
-    mysqli_close($link);
-    return mysqli_result_to_json($result);
-  }
+  //   if(!$result) $result = mysqli_error($link);
 
-  function deleteReport($link, $data) {
-    if(is_null($link)){ $link = DBConnect();}
+  //   mysqli_close($link);
+  //   return mysqli_result_to_json($result);
+  // }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+  // function deleteReport($link, $data) {
+  //   if(is_null($link)){ $link = DBConnect();}
 
-    $sql = sprintf("DELETE FROM ECO_Reports where reportidx=%d and memberidx=%d", $data["reportIdx"], $memberIdx);
+  //   $memberIdx = $_SESSION['report_login_userIdx'];
+
+  //   $sql = sprintf("DELETE FROM ECO_Reports where reportidx=%d and memberidx=%d", $data["reportIdx"], $memberIdx);
     
-    $result = mysqli_query($link, $sql);
-    if(!$result) $result = mysqli_error($link);
+  //   $result = mysqli_query($link, $sql);
+  //   if(!$result) $result = mysqli_error($link);
 
-    mysqli_close($link);
-    return json_encode(array("result"=>$result));
-	}
+  //   mysqli_close($link);
+  //   return json_encode(array("result"=>$result));
+	// }
 	
 	function getReportsFromMemberWithDate($link, $data) {
 		if(is_null($link)){ $link = DBConnect();}

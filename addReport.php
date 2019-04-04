@@ -1,30 +1,11 @@
 <?php
   include "lib/db.php";
   include "lib/default.php";  
-  if(!empty($_POST)){
-    $data = $_POST;
-    // $link = DBConnect();
-    // $memberIdx = $_SESSION['report_login_userIdx'];    
-    
-    // $sql = "INSERT INTO ECO_Reports_New (memberidx, work_d, work_h, projectidx, content) values ";
-  
-    // /*
-    // 싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
-    // row가 여러개니 벌크로 insert 한다
-    // 위의 이유로 sprint로 sql을 만들어서 쿼리한다
-    // */
-    // $str_format = "(%d, '%s', %f, %d, '%s'), ";        
-    // foreach($data as $row){      
-    //   $sql .= sprintf($str_format,$memberIdx, $row["work_date"], $row["work_hour"], $row["project_id"], @addslashes($row["content"]));
-    // }
-    // $sql = substr($sql, 0, strlen($sql) - 2);  
-    // $result = mysqli_query($link, $sql);
-    
-    // echo json_encode(array("result"=>$result));
-    // mysqli_close($link);
-    echo insertReport(null, $data);
-    return;
-  }
+  // if(!empty($_POST)){
+  //   $data = $_POST;
+  //   echo insertReport(null, $data);
+  //   return;
+  // }
 ?>
 <!DOCTYPE html>
 <html>
@@ -111,11 +92,7 @@
   </div>
 </div>
 <script type="text/javascript">
-  (function(){  //onload
-    //iframe resize;
-    parent.fncResizeHeight(document);
-    //parent.document.querySelector('#C2ScontentsFrame').height='1000px';
-  })();
+
   $(function(){
     $("#datepicker").datepicker({
       showOtherMonths: true,
@@ -127,10 +104,33 @@
     $('#datepicker').datepicker( "setDate" , AddReport.getToday() );
 
     AddReport.setProjects();
+
+    //iframe resize;
+    parent.fncResizeHeight(document);
+    //parent.document.querySelector('#C2ScontentsFrame').height='1000px';
+
+    if(localStorage.reportBackup){
+      Report.confirm('작성중이던 보고서가 있습니다. 불러오시겠습니까?', function(b){
+        if(!b) {localStorage.reportBackup=''; return;}
+
+        //백업된것 붙인다.
+        $('.work-list tbody').html(localStorage.reportBackup);
+        AddReport.summary();
+      })
+    }
+
+    AddReport.autoBackup = setInterval(() => {
+      // 임시 백업
+      // 가라로 한거니 바꾸는게 좋을듯. 파싱해서 서버에 저장하는게 낫지않을까
+      if($('.work-list tbody').html().trim().length > 0) localStorage.reportBackup = $('.work-list tbody').html();
+      console.log('localStorage.reportBackup='+localStorage.reportBackup);
+    }, 1*60*1000);
   });
 
   var AddReport = {
     projects : {},
+
+    autoBackup: null,
 
     getToday: function(){
       return Date.now();
@@ -302,9 +302,13 @@
         // $.post('post_test.php', data, function(res){
         //   console.log(res);
         // });
-        $.post('addReport.php', data, function(res){
-          console.log(res);
+        Report.post('insertReport', data).then(function(res){
           if(res.result){
+            //백업된것 삭제
+            localStorage.reportBackup='';
+            //interval 중지
+            clearInterval(AddReport.autoBackup);
+
             Report.confirm('보고서가 제출되었습니다.\n\n보고서 조회 메뉴로 이동하시겠습니까?', function(chk){
               if(chk){
                 $(parent.document).find('li').removeClass('on');          
@@ -325,7 +329,7 @@
           } else {
             alert('제출 실패')
           }
-        }, 'json');
+        });
       });
     },
     lastReport: function(e){
@@ -336,20 +340,12 @@
         projectIdx: id        
       }
       Report.get("getLastReportFromProject", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-        }
-				if(json_res==null || json_res.error){
+				if(res==null){
           Report.alert('해당 프로젝트의 이전 업무보고가 없습니다.');
-					console.log(json_res);
+					console.log(res);
 					return;
         }
-        AddReport.modalOpen(json_res);
+        AddReport.modalOpen(res);
       });
     },    
     modalOpen: function(report){
@@ -361,21 +357,8 @@
       $('.overlay').hide();
     },
     setProjects: function(){
-      Report.get("getProjects").then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-        }
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }        
-        AddReport.projects = json_res;
-        
+      Report.get("getProjects").then(function(res){        
+        AddReport.projects = res;
         //프로젝트 선택 select 생성
         AddReport.setProjectSelect();
       });

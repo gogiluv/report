@@ -6,26 +6,6 @@
   if ( $_SESSION["report_login_level"] < 2 ) {
     header('Location: main.php');
   }
-  
-	//get
-  if(!empty($_GET)){
-    $data = $_GET;
-		$result = getReportsFromMemberWithDate(null, $data);
-		
-		echo $result;
-    return;
-	}
-	//post
-	if(!empty($_POST)){
-    $data = $_POST;
-		$result = deleteReport(null, $data);
-		
-		echo $result;
-    return;
-  }
-
-  //팀원 list
-  $members = getMemberAll(null);
 ?>
 <!DOCTYPE html>
 <html>
@@ -54,11 +34,6 @@
             <thead>
               <tr>
                 <td>
-                  <select id="name">
-                  </select>
-                </td>
-
-                <td>
                   <span>
                     <label for="from">업무일</label>
                     <input type="text" id="from" name="from">
@@ -77,12 +52,9 @@
           <table>
             <thead>
               <tr>
-                <th width="10%">이름</th>
-                <th width="10%">업무일자</th>
-                <th width="10%">근무 시간</th>
-                <th width="15%">유형</th>
-                <th width="*">내용</th>
-                <th width="10%">비고</th>
+                <th width="20%">근무일</th>
+                <th width="40%">작성자</th>
+                <th width="40%">미작성자</th>
               </tr>            
             </thead>
             <tbody>
@@ -90,15 +62,6 @@
           </table>
         </div>      
       </div>
-    </div>
-  </div>
-</div>
-<div class="overlay boardtype2">  
-  <div class="modal-div">
-    <div class="ui-icon ui-icon-closethick modal-close" onclick="RS.expandModalClose()"></div>
-    <div class="modal-header">      
-    </div>
-    <div class="modal-content">
     </div>
   </div>
 </div>
@@ -114,7 +77,7 @@
 				to: $('#to').val()
       }
 
-			$.get('reportSummary.php', data, function(res){
+			Report.get('getReportStatus', data).then(function(res){
         var json_res = null;
         try {
           json_res = JSON.parse(res);
@@ -128,7 +91,7 @@
 					return;
 				}
         RS.renderRows(json_res);
-			})
+			});
 		},
 		renderRows: function(rows) {
       var list = $('.rs-list tbody');
@@ -172,136 +135,13 @@
         html.push('</tr>');        
         list.append(html.join(''));
       }		
-      RS.sumWorkHour();	
+      
       parent.fncResizeHeight(document);	//resize
-    },
-    
-		deleteRow: function(id){
-      // TODO: 필요한지 확인 해야함      
-			var chk = confirm('삭제하시겠습니까?');
-      
-      if(!chk){return;}
-
-			var data = {
-				reportIdx: id
-			}
-
-			$.post('reportSummary.php', data, function(res){
-				var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
-        RS.search();
-			})
-    },
-    expandReport: function(id){
-      var data = {
-        reportIdx: id        
-      }
-      Report.get("getReportFromId", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
-        RS.expandModalOpen(json_res);
-      });
-      // $.get('lib/api.php', data, function(res){
-      //   console.log(res);
-      // });
-    },
-    expandModalOpen: function(report){
-      console.log(report);
-      $('.modal-header').text('보고일: '+ report.work_d);
-      $('.modal-content').text(report.Report);
-      $('.overlay').show();
-    },
-    expandModalClose: function(){
-      $('.overlay').hide();
-    },
-    sumWorkHour: function(){
-      //console.log($('tr[data-member-name]').attr('data-member-name'),' : ',$('tr[data-member-name]').length);
-      var rows = $('tr[data-member-name]');
-      var member_data = {};
-      //console.log($(rows[0]).attr('data-member-name'));
-      for(var i=0; i<rows.length; i++) {
-        var row = rows[i];
-        if(member_data[$(row).attr('data-member-name')]){
-          member_data[$(row).attr('data-member-name')] += Number($(row).find('td[data-work-h]').text());
-        }else{
-          member_data[$(row).attr('data-member-name')] = Number($(row).find('td[data-work-h]').text());
-        }
-      }
-      
-      var members = Object.keys(member_data);
-      for(var i in members) {        
-        var html = [];        
-        html.push('<tr class="sum-row" data-member-name='+members[i]+'>');
-        html.push('<td>근무시간 합계</td>');
-        html.push('<td>');
-        html.push(member_data[members[i]]);
-        html.push('</td>');
-        html.push('<td colspan=3></td>')
-        html.push('</tr>');
-        
-        $('tr[data-member-name='+members[i]+']:last').after(html.join(''));
-        
-        var row_count = $('tr[data-member-name='+members[i]+']').length;
-        $('tr[data-member-name='+members[i]+']:first th').attr('rowspan', row_count);
-      }
-    },
-    
-    setMemeberSelect: function(){
-      Report.get("getMembersForSummary").then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }        
-        return json_res;        
-      }).then(function(data){
-        var html = [];
-        html.push('<option value="">All</option>');
-        for(var i in data){
-          html.push('<option value='+data[i].MemberIdx+'>'+data[i].MemberName+'</option>');
-        }
-        $('select[id="name"]').html(html.join(''));        
-      });
     },
 
 	}
   
 	$(function(){
-    // $("#datepicker").datepicker({
-    //   showOtherMonths: true,
-    //   selectOtherMonths: true,
-    //   changeMonth: true,
-    //   changeYear: true,
-    //   dateFormat:"yy-mm-dd",      
-    // });
-		// $('#datepicker').datepicker( "setDate" , RS.getToday() );
 		
     var dateFormat = "yy-mm-dd",
       from = $( "#from" )
@@ -342,7 +182,6 @@
       return date;
     }
     //init
-    RS.setMemeberSelect();
     RS.search();
   });
 </script>

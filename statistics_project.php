@@ -2,12 +2,12 @@
   include "lib/default.php";
   include "lib/db.php";
   
-  if(!empty($_POST)){
-    $data = $_POST;
-    $result = getStatisticsProject(null, $data["memberIdx"], $data["year"], $data["month"]);
-    echo $result;
-    return;
-  }
+  // if(!empty($_POST)){
+  //   $data = $_POST;
+  //   $result = getStatisticsProject(null, $data["memberIdx"], $data["year"], $data["month"]);
+  //   echo $result;
+  //   return;
+  // }
   //팀원 list
   $members = getMemberAll(null);
 ?>
@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="css/common.css">    
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="js/report.js"></script>
 </head>
 <body>
 
@@ -111,21 +112,8 @@
       data.year = $('select[id=year]').val() || new Date().getFullYear();
       data.month = $('select[id=month]').val() || null;
 
-      $.post('statistics_project.php', data, function(res){        
-        //json_res = JSON.parse(res);
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-        }  
-        if(json_res==null || json_res.error){
-          console.error(json_res);
-          return;
-        }
-        SP.renderRows(json_res);
+      Report.post('getStatisticsProject', data).then(function(res){        
+        SP.renderRows(res);
       });
     },
     renderRows: function(rows){

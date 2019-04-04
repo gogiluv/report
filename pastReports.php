@@ -2,22 +2,22 @@
   include "lib/default.php";
   include "lib/db.php";
 	
-	//get
-  if(!empty($_GET)){
-    $data = $_GET;
-		$result = getReportsFromDate(null, $data);
+	// //get
+  // if(!empty($_GET)){
+  //   $data = $_GET;
+	// 	$result = getReportsFromDate(null, $data);
 		
-		echo $result;
-    return;
-	}
-	//post
-	if(!empty($_POST)){
-    $data = $_POST;
-		$result = deleteReport(null, $data);
+	// 	echo $result;
+  //   return;
+	// }
+	// //post
+	// if(!empty($_POST)){
+  //   $data = $_POST;
+	// 	$result = deleteReport(null, $data);
 		
-		echo $result;
-    return;
-  }
+	// 	echo $result;
+  //   return;
+  // }
 ?>
 <!DOCTYPE html>
 <html>
@@ -97,6 +97,16 @@
 			var data = {
 				from: $('#from').val(),
 				to: $('#to').val()
+      }
+      
+			Report.get('getPastReports', data).then(function(res){
+        PR.renderRows(res);
+			});
+    },
+    search_bak: function() {
+			var data = {
+				from: $('#from').val(),
+				to: $('#to').val()
 			}
 			$.get('pastReports.php', data, function(res){
 				var json_res = null;
@@ -107,10 +117,14 @@
           console.log(res);
           return;
 				}
-				if(json_res.error){
-					console.log(json_res.error);
+				if(json_res.error && json_res.error==='SESSION_EXPIRED'){
+          alert('세션이 만료되었습니다. 로그인 페이지로 이동합니다.');
+          parent.location.href="index.php";
 					return;
-				}
+        }else if(json_res.error){
+          alert('관리자에게 문의 해 주세요: '+json_res.error);
+          console.error(json_res.error);
+        }
         PR.renderRows(json_res);
 			})
 		},
@@ -161,19 +175,7 @@
 				reportIdx: id
 			}
 
-			$.post('pastReports.php', data, function(res){
-				var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
+			Report.post('deleteReport', data).then(function(res){
         PR.search();
 			})
     },
@@ -182,23 +184,8 @@
         reportIdx: id        
       }
       Report.get("getReportFromId", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-				}
-        PR.expandModalOpen(json_res);
+        PR.expandModalOpen(res);
       });
-      // $.get('lib/api.php', data, function(res){
-      //   console.log(res);
-      // });
     },
     expandModalOpen: function(report){
       $('.modal-header').text('보고일: '+ report.work_d);
@@ -214,22 +201,10 @@
         reportIdx: id        
       }
       Report.get("getReportFromId", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }
-        $(row).find('td:eq(0)').html('<input type="number" id="work-hour" value="'+json_res.work_h+'" step="0.01" min="0" max="24" onchange=""/>');
-        $(row).find('td:eq(1)').html(PR.getProjectSelectHtml(json_res.ProjectIdx));
+        $(row).find('td:eq(0)').html('<input type="number" id="work-hour" value="'+res.work_h+'" step="0.01" min="0" max="24" onchange=""/>');
+        $(row).find('td:eq(1)').html(PR.getProjectSelectHtml(res.ProjectIdx));
         $(row).find('td:eq(2)').css('height', '100px');
-        $(row).find('td:eq(2)').html('<textarea placeholder="write here...">'+json_res.Report+'</textarea>');
+        $(row).find('td:eq(2)').html('<textarea placeholder="write here..." style="height:96px;">'+res.Report+'</textarea>');
         $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="확인" onclick="PR.modifyConfirm('+id+')">'
           +'<input type="button" class="button red" value="취소" onclick="PR.resetForm('+id+')">');        
       });
@@ -243,22 +218,7 @@
         content: $(row).find('textarea').val()
       }
       Report.get("updateReport", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }
-
-        // 업데이트 후 해당 항목 불러옴
-        // 성공체크
-        if(json_res.result){
+        if(res.result){
           PR.resetForm(id);
         }
       });
@@ -269,28 +229,15 @@
         reportIdx: id        
       }
       Report.get("getReportFromId", data).then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-				}
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }
-
-        $(row).find('td:eq(0)').text(Number(json_res.work_h));
-        $(row).find('td:eq(1)').text(json_res.ProjectName);
+        $(row).find('td:eq(0)').text(Number(res.work_h));
+        $(row).find('td:eq(1)').text(res.ProjectName);
         $(row).find('td:eq(2)').css('height', '');
         $(row).find('td:eq(2)').html(
-          '<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+json_res.ReportIdx+')"></div>'
-          + json_res.Report
+          '<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+res.ReportIdx+')"></div>'
+          +'<div class="preview-scroll-hidden mh-200">'+res.Report+'</div>'
         );        
-        $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+json_res.ReportIdx+')">'
-          + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+json_res.ReportIdx+')">');        
+        $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+res.ReportIdx+')">'
+          + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+res.ReportIdx+')">');        
       });
     },
 
@@ -325,19 +272,7 @@
 
     setProjects: function(){
       Report.get("getProjects").then(function(res){
-        var json_res = null;
-        try {
-          json_res = JSON.parse(res);
-        } catch (e) {
-          console.log(e);
-          console.log(res);
-          return;
-        }
-				if(json_res==null || json_res.error){
-					console.log(json_res);
-					return;
-        }        
-        PR.projects = json_res;
+        PR.projects = res;
       });
     }
 	}
