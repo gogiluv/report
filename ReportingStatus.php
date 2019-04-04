@@ -6,7 +6,7 @@
   if ( $_SESSION["report_login_level"] < 2 ) {
     header('Location: main.php');
   }
-
+  
 	//get
   if(!empty($_GET)){
     $data = $_GET;
@@ -165,7 +165,6 @@
         html.push('<div class="preview-scroll-hidden mh-200">');
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="RS.expandReport('+row.reportidx+')"></div>');
         html.push(row.report);
-        html.push('</div>')
         html.push('</td>');
         html.push('<td>');
 				//html.push('<input type="button" class="button red" value="삭제" onclick="RS.deleteRow('+row.reportidx+')">');

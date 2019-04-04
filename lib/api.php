@@ -75,7 +75,7 @@
     $link = DBConnect();
 
 		$sql = "SELECT * FROM ECO_Project WHERE is_enabled=1
-            order by isgame desc, projectname asc";
+            order by isgame asc, projectname asc";
     
     $result = mysqli_query($link, $sql);
 
@@ -158,9 +158,7 @@
   }
 
   function updateReport($data){
-    $link = DBConnect();
-
-		$memberIdx = $_SESSION['report_login_userIdx'];    
+		$memberIdx = $_SESSION['report_login_userIdx'];
     
 		/*
 		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
@@ -170,7 +168,7 @@
                     where reportidx=%d and memberidx=%d", 
                     $data["work_hour"], $data["project_id"], 
                     @addslashes($data["content"]), $data["report_id"], $memberIdx);		
-		
+    $link = DBConnect();
     $result = mysqli_query($link, $sql);
 
     //mysql error
@@ -179,4 +177,22 @@
     mysqli_close($link);
     return json_encode(array("result"=>$result));
   }
+
+  function getMembersForSummary(){    
+		//레벨 3 미만의 멤버만 가져온다
+    //관리자 = 99, 팀장님 = 3
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $partIdx = $_SESSION["report_login_partIdx"];
+    
+    $part_sql = '';
+    if($partIdx!=1){ $part_sql = sprintf("and partIdx=%d", $partIdx); }
+
+    $sql = sprintf("SELECT * FROM ECO_Member where visible=1 and levelidx < 3 %s order by memberidx", $part_sql);
+    
+		$link = DBConnect();
+		$result = mysqli_query($link, $sql);
+
+		mysqli_close($link);
+		return mysqli_result_to_json($result);
+	}
 ?>

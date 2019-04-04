@@ -63,18 +63,7 @@
                   <input type="number" id="min" value="0" step="1" min="0" max="59"/>분
                   <input type="number" id="work-hour" value="0.00" step="0.01" min="0" max="24" style="-moz-appearance:textfield;"/>
                 </span> -->
-                <span><label for="project-name">프로젝트</label>
-                  <select id="project-name">
-                    <option value="" disabled selected>...........</option>
-                    <?php 
-                      $result = getProjectAll(null);
-                      while($row = mysqli_fetch_array($result))
-                      {                        
-                        echo "<option value='$row[ProjectIdx]'>$row[ProjectName]</option>";
-                      }
-                      @mysqli_free_result($result);
-                    ?>
-                  </select>
+                <span class="project-select"></span>
                 <span><input type="button" class="button red" value="추가하기" onclick="AddReport.addWork()"></span>
               </td>
             </tr>
@@ -85,7 +74,7 @@
         <table>
           <thead>
             <tr>
-              <th width="10%">업무 일자</th>
+              <th width="120px">업무 일자</th>
               <th width="10%">업무 시간</th>
               <th width="20%">유형</th>
               <th width="*">내용</th>
@@ -160,8 +149,8 @@
       var project_id = $('#project-name').val();
       var project_name = $('#project-name option:selected').text();
       
-      if(project_id === null) { alert('프로젝트를 선택 해 주세요.'); return; }
-      if(work_hour > 24) { alert('근무시간은 24를 초과 할 수 없습니다.'); return; }
+      if(project_id === null) { Report.alert('프로젝트를 선택 해 주세요.'); return; }
+      if(work_hour > 24) { Report.alert('근무시간은 24를 초과 할 수 없습니다.'); return; }
 
       //var row = $('#row-'+selected_date).length>0 ? $('#row-'+selected_date) : AddReport.createRow(selected_date, work_hour);
       var row = AddReport.createRow(selected_date, work_hour, project_name, project_id);
@@ -197,7 +186,7 @@
       html.push('<textarea placeholder="write here..."></textarea>');
       html.push('</td>');
       html.push('<td>');
-      html.push('<input type="button" class="button blue" value="최근보고" onclick="AddReport.lastReport('+project_id+')">');
+      html.push('<input type="button" class="button blue" value="최근보고" onclick="AddReport.lastReport(this)">');
       html.push('<input type="button" class="button red mt-10" value="삭제" onclick="AddReport.deleteRow(this)">');
       html.push('</td>');
 
@@ -287,42 +276,62 @@
       var data = {};
       var rows = $('.work-list table tbody tr');
 
-      if(rows.length < 1){alert('작성 내역이 없습니다.'); return;}
-      if(!confirm('제출하시겠습니까?')){ return; }      
+      if(rows.length < 1){Report.alert('작성 내역이 없습니다.'); return;}
+      
+      //if(!confirm('제출하시겠습니까?')){ return; }
+      Report.confirm('제출하시겠습니까?', function(b){
+        if(!b) return;
 
-      for(var i=0; i < rows.length; i++){        
-        var row = rows[i];
-        var work_date = $(row).attr('data-date');
-        var work_hour = Number($(row).find('td:first input[type="number"]').val());
-        //var project_name = $(row).find('td:eq(1)').text();
-        //var project_id = $(row).find('td:eq(1)').attr('data-projectId');
-        var project_name = $(row).find('td:eq(1) > select option:selected').text();
-        var project_id = $(row).find('td:eq(1) > select option:selected').val();
-        var content = $(row).find('textarea').val();
-        data[i] = {
-          work_date: work_date,
-          work_hour: work_hour,
-          project_name: project_name,
-          project_id: project_id,
-          content: content,
+        for(var i=0; i < rows.length; i++){        
+          var row = rows[i];
+          var work_date = $(row).attr('data-date');
+          var work_hour = Number($(row).find('td:first input[type="number"]').val());
+          //var project_name = $(row).find('td:eq(1)').text();
+          //var project_id = $(row).find('td:eq(1)').attr('data-projectId');
+          var project_name = $(row).find('td:eq(1) > select option:selected').text();
+          var project_id = $(row).find('td:eq(1) > select option:selected').val();
+          var content = $(row).find('textarea').val();
+          data[i] = {
+            work_date: work_date,
+            work_hour: work_hour,
+            project_name: project_name,
+            project_id: project_id,
+            content: content,
+          }
         }
-      }
-      // $.post('post_test.php', data, function(res){
-      //   console.log(res);
-      // });
-      $.post('addReport.php', data, function(res){
-        console.log(res);
-        if(res.result){
-          alert('제출 완료');
-          console.log(res.result);
-          parent.OpenURL("pastReports.php");
-          //location.reload();
-        } else {
-          alert('제출 실패')
-        }
-      }, 'json');
+        // $.post('post_test.php', data, function(res){
+        //   console.log(res);
+        // });
+        $.post('addReport.php', data, function(res){
+          console.log(res);
+          if(res.result){
+            Report.confirm('보고서가 제출되었습니다.\n\n보고서 조회 메뉴로 이동하시겠습니까?', function(chk){
+              if(chk){
+                $(parent.document).find('li').removeClass('on');          
+                $(parent.document).find('li:eq(3)').addClass('on');
+              parent.OpenURL("pastReports.php");
+              }else{
+                location.reload();
+              }
+            });
+            // var chk = confirm('보고서가 제출되었습니다.\n\n보고서 조회 메뉴로 이동하시겠습니까?');          
+            // if(chk){
+            //   $(parent.document).find('li').removeClass('on');          
+            //   $(parent.document).find('li:eq(3)').addClass('on');
+            //   parent.OpenURL("pastReports.php");
+            // }else{
+            //   location.reload();
+            // }
+          } else {
+            alert('제출 실패')
+          }
+        }, 'json');
+      });
     },
-    lastReport: function(id){
+    lastReport: function(e){
+      var id = $(e).parent().parent().find('td:eq(1) select').val();
+      console.log(id);
+
       var data = {
         projectIdx: id        
       }
@@ -336,7 +345,7 @@
           return;
         }
 				if(json_res==null || json_res.error){
-          alert('해당 프로젝트의 이전 업무보고가 없습니다.');
+          Report.alert('해당 프로젝트의 이전 업무보고가 없습니다.');
 					console.log(json_res);
 					return;
         }
@@ -366,13 +375,24 @@
 					return;
         }        
         AddReport.projects = json_res;
+        
+        //프로젝트 선택 select 생성
+        AddReport.setProjectSelect();
       });
     },
     getProjectSelectHtml: function(project_name) {
       var rows = AddReport.projects;
       var html = [];
+      var inserted_line = false;
       html.push('<select onchange="AddReport.summary()">');
-      for(var num in AddReport.projects){
+      for(var num in rows){
+        //구분선 넣기
+        if(rows[num].IsGame==1 && !inserted_line){
+          html.push('<option disabled></option>');
+          html.push('<option disabled>-------------game--------------</option>');
+          html.push('<option disabled></option>');
+          inserted_line = true;
+        }
         if(rows[num].ProjectName===project_name){
           html.push('<option value="'+rows[num].ProjectIdx+'" selected>');
         }else{
@@ -380,9 +400,33 @@
         
         html.push(rows[num].ProjectName);
         html.push('</option>');
+
       }
       html.push('<select>');
       return html.join('');
+    },
+    setProjectSelect: function(){
+      var rows = AddReport.projects;
+      var html = [];
+      var inserted_line = false;
+
+      html.push('<label for="project-name">프로젝트</label>');
+      html.push('<select id="project-name">');      
+      html.push('<option value="" disabled selected>....................</option>');
+      for(var num in rows){
+        //구분선 넣기
+        if(rows[num].IsGame==1 && !inserted_line){
+          html.push('<option disabled></option>');
+          html.push('<option disabled>-------------game--------------</option>');
+          html.push('<option disabled></option>');
+          inserted_line = true;
+        }
+        html.push('<option value="'+rows[num].ProjectIdx+'">');
+        html.push(rows[num].ProjectName);
+        html.push('</option>');
+      }
+      html.push('<select>');
+      $('.project-select').html(html.join(''));
     }
   }
 </script>

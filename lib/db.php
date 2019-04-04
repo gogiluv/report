@@ -4,15 +4,14 @@
 	function DBConnect()
 	{
 		
-		// $link = @mysqli_connect('localhost', 'eco', '36Mw@c=vfg');
-		
-		// $link = @mysqli_connect('localhost', 'root', 'root');
+		// $link = @mysqli_connect('localhost', 'eco', '36Mw@c=vfg');		
 		$link = @mysqli_connect('localhost', 'report_admin', 'q1w2e3r4!@');
 		if (!$link)
 			// die('Could not connect: ' . mysqli_error());
 			die('Could not connect: ' . mysqli_connect_error());
 		@mysqli_select_db($link, 'report');
-		@mysqli_query("set names utf8");
+		//@mysqli_query("set names utf8");
+		mysqli_set_charset($link, 'utf8');
 		return $link;
 	}
 
@@ -280,14 +279,21 @@
 			$member_sql = "and er.memberidx=$data[memberIdx] ";
 		}
 
+		// 파트장님들은 해당 파트만 볼수있음
+		$partIdx = $_SESSION["report_login_partIdx"];
+		$part_sql = '';
+		if($partIdx!=1){ 
+			$part_sql = "and em.partIdx=$partIdx"; 
+		}
+
 		$sql = sprintf("SELECT er.reportidx, er.memberidx, er.work_d, er.work_h, er.report, 
 										ep.projectname, em.membername
 										FROM ECO_Reports as er 
 										INNER JOIN ECO_Project as ep ON er.projectidx=ep.projectidx 
 										INNER JOIN ECO_Member as em ON er.memberidx=em.memberidx
-										WHERE er.work_d between '%s' and '%s' %s
+										WHERE er.work_d between '%s' and '%s' %s %s
 										order by em.membername asc, er.work_d asc", 
-										$data['from'], $data['to'], $member_sql);
+										$data['from'], $data['to'], $member_sql, $part_sql);
     
     $result = mysqli_query($link, $sql);
 		if(!$result) $result = mysqli_error($link);

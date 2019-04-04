@@ -169,7 +169,11 @@
       for(var i=0; i<$('tr[data-date]').length; i++){
         row = $('tr[data-date]')[i];
         var month = $(row).attr('data-date');
-        var work_h = $(row).find('td[data-work-h]').attr('data-work-h');        
+        var work_h = $(row).find('td[data-work-h]').attr('data-work-h');
+
+        // 0/0 처리
+        if(work_h == 0) {$(row).find('td:last').text('0.00%'); continue;}
+
         $(row).find('td:last').text(((parseFloat(work_h)/work_h_sum[month])*100).toFixed(2)+'%');
       }
     }

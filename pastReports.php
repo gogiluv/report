@@ -137,9 +137,11 @@
         html.push('<td>');
         html.push(row.projectname);
         html.push('</td>');
-        html.push('<td class="preview-scroll-hidden mh-200">');
+        html.push('<td>');
+        html.push('<div class="preview-scroll-hidden mh-200">');
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+row.reportidx+')"></div>');
-				html.push(row.report);
+        html.push(row.report);
+        html.push('</div>')
 				html.push('</td>');
         html.push('<td>');
         html.push('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+row.reportidx+')">');
@@ -279,7 +281,7 @@
 					console.log(json_res);
 					return;
         }
-        
+
         $(row).find('td:eq(0)').text(Number(json_res.work_h));
         $(row).find('td:eq(1)').text(json_res.ProjectName);
         $(row).find('td:eq(2)').css('height', '');
@@ -294,11 +296,19 @@
 
     getProjectSelectHtml: function(projectIdx) {
       var rows = PR.projects;
+      var inserted_line = false;
       var html = [];
       
       html.push('<select>');
 
       for(var num in rows){
+        //구분선 넣기
+        if(rows[num].IsGame==1 && !inserted_line){
+          html.push('<option disabled></option>');
+          html.push('<option disabled>-------------game--------------</option>');
+          html.push('<option disabled></option>');
+          inserted_line = true;
+        }
         if(rows[num].ProjectIdx===projectIdx){
           html.push('<option value="'+rows[num].ProjectIdx+'" selected>');
         }else{

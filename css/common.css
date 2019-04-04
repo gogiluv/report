@@ -170,7 +170,22 @@
 .modal-content {
     margin: auto;
     padding: 10px;
-    max-height: 500px;    
+    max-height: 500px;
     overflow: auto;
     white-space: pre-wrap;    
+}
+.alert, .confirm {
+    text-align: center;
+}
+.alert .modal-div, .confirm .modal-div {
+    font-size: 20px;
+    min-height: 0px;
+    width: 400px;
+    left:30%;
+}
+.alert .modal-content, .confirm .modal-content {
+    font-size: 15px;   
+}
+.alert .modal-footer, .confirm .modal-footer {
+    font-size: 15px;   
 }
