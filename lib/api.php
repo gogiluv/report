@@ -400,4 +400,173 @@
     mysqli_close($link);
     return json_encode(array("result"=>$result));
   }
+  function getReportedMember_bak($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+    
+		$sql = sprintf("SELECT em.MemberName, er.work_d, year(er.work_d) as year, month(er.work_d) as month 
+    from ECO_Reports as er inner join ECO_Member as em on er.MemberIdx=em.MemberIdx 
+    GROUP by em.MemberName, er.work_d having work_d BETWEEN '%s' and '%s' order by er.work_d desc", $data['from'], $data['to']);
+    
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    return mysqli_result_to_json($result);
+  }
+
+  function getMembers(){
+		//레벨 3 미만의 멤버만 가져온다
+    //관리자 = 99, 팀장님 = 3		
+    $link = DBConnect();
+		$result = mysqli_query($link, "SELECT * FROM ECO_Member where visible=1 and levelidx < 3 order by memberidx");    
+    //mysql error    
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    
+		return mysqli_result_to_json($result);
+  }
+  
+  function getReportedMember($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+    
+		$report_sql = sprintf("SELECT em.MemberName, er.work_d, year(er.work_d) as year, month(er.work_d) as month 
+    from ECO_Reports as er inner join ECO_Member as em on er.MemberIdx=em.MemberIdx 
+    GROUP by em.MemberName, er.work_d having work_d BETWEEN '%s' and '%s' order by er.work_d desc", $data['from'], $data['to']);
+    
+    $link = DBConnect();
+    $report_result = mysqli_query($link, $report_sql);
+
+    //mysql error
+    if(!$report_result) {
+      $report_result = mysqli_error($link);
+      return mysqli_result_to_json($report_result);
+    }
+
+    //레벨 3 미만의 멤버만 가져온다
+    //관리자 = 99, 팀장님 = 3		
+		$member_result = mysqli_query($link, "SELECT membername FROM ECO_Member where visible=1 and levelidx < 3 order by memberidx");    
+    //mysql error    
+    if(!$member_result) {
+      $member_result = mysqli_error($link);
+      return mysqli_result_to_json($member_result);
+    }
+
+    $member_arr = array();
+    while($member = $member_result->fetch_assoc()){
+      $member_arr[] = $member['membername'];
+    }
+
+    $from = new DateTime($data['from']);
+    $to = new DateTime($data['to']);
+    $day = array("일","월","화","수","목","금","토");
+    $reported_arr = array();
+
+    // for($to; $to>=$from; date_modify($to, '-1 day')){
+    //   $reported_arr[date_format($to, 'Y-m-d')] = "yeeeeeeeee";
+    // }
+
+    //날자 배열 세팅
+    for($from; $from<=$to; date_modify($from, '+1 day')){
+      $reported_arr[date_format($from, 'Y-m-d')] = array('reported'=>[], 'unreported'=>[], 'day'=> $day[date_format($from, 'w')]);
+    }
+
+    //정렬, 날짜 내림차순
+    //uksort($reported_arr, 'dateSort');
+    krsort($reported_arr);
+
+    //set reported user
+    while ( $row = $report_result->fetch_assoc()) {      
+      $reported_arr[$row['work_d']]['reported'][] = $row['MemberName'];      
+    }
+    //set unreported user
+    foreach($reported_arr as $key => $value){
+      // 보고서 안쓴사람 = 전체 멤버 - 작성한 멤버
+      // 아무도 안썼을 경우 체크해서 멤버 전체 배열 넣음
+      if(isset($value['reported'])){
+        $reported_arr[$key]['unreported'] = array_values(array_diff($member_arr, $value['reported']));
+      }else{
+        $reported_arr[$key]['unreported'] = $member_arr;
+      }
+    }
+
+    mysqli_close($link);
+    return json_encode($reported_arr);
+  }
+
+  function setDraft($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    
+		$sql = sprintf("INSERT INTO ECO_Draft (memberidx, draft) values (%d, '%s')", $memberIdx, $data);
+	
+    
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    return json_encode(array("result"=>$result));
+  }
+
+  function getDraft(){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];    
+    
+		$sql = sprintf("SELECT draft FROM ECO_Draft WHERE memberidx=%d order by created_dt desc limit 1", $memberIdx);
+	
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+
+    //return mysqli_result_to_json($result);
+
+    $draft = $result->fetch_assoc();  //limit 1이기 때문에 한번만 수행하면 된다.
+    return json_encode(json_decode($draft['draft'], true));
+  }
+
+  function deleteDraft(){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];    
+    
+		$sql = sprintf("DELETE FROM ECO_Draft WHERE memberidx=%d", $memberIdx);
+	
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    return json_encode(array("result"=>$result));
+  }
+
+
 ?>

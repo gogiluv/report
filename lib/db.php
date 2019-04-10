@@ -21,7 +21,7 @@
 		$time = time();
 
 		if(@$_SESSION["report_login_user"]) {
-			if($_SESSION["report_login_time"] + 3600 < $time)
+			if($_SESSION["report_login_time"] + 7200 < $time)
 				return false;
 			$_SESSION["report_login_time"] = $time;
 			return true;

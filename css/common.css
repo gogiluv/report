@@ -50,7 +50,7 @@
 }
 
 .preview-scroll-hidden {
-    white-space: pre-line;
+    white-space: pre-wrap;
     text-overflow: ellipsis;
     overflow: hidden;    
 }
@@ -97,6 +97,9 @@
         lightyellow calc(50% + 1px)
       );
 }
+.status-list table tbody tr td, .status-list table tbody tr th{
+    height: 50px;
+}
 
 /*
     padding, height, etc....
@@ -113,6 +116,12 @@
 .mr-20 {
     margin-right: 20px;
 }
+.ml-10 {
+    margin-left: 10px;
+}
+.ml-20 {
+    margin-left: 20px;
+}
 .mh-200 {
     max-height: 200px;
 }
@@ -128,6 +137,15 @@
 }
 .mt-10 {
     margin-top: 10px;
+}
+.bg-lightpink {
+    background-color: lightpink;
+}
+.ta-c {
+    text-align: center;
+}
+.d-n {
+    display: none;
 }
 .overlay {
     display:none;

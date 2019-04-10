@@ -37,7 +37,7 @@
 <body>
 
 <div class="C2Scontent">
-	<h1 class="location">관리메뉴 > 지난보고서</h1>
+	<h1 class="location">관리메뉴 > 보고서 조회</h1>
   <div>    
     <div class="boardtype2" style="width:auto; max-width:1300px;">
       <div class="select-area">

@@ -2,6 +2,13 @@
   include "lib/default.php";
   include "lib/db.php";
 
+  //로그인 체크
+  if (!SessionCheck()) {
+    echo "<script type='text/javascript'>
+          top.window.location='login.php';
+          </script>";
+  }
+
   //페이지 권한 체크
   if ( $_SESSION["report_login_level"] < 2 ) {
     header('Location: main.php');
@@ -42,7 +49,7 @@
     <div>
       <div class="boardtype2" style="width:auto; max-width:1500px;">
         <div class="select-area">
-          <table style="width:500px;">
+          <table style="width:530px;">
             <thead>
               <tr>
                 <td>
@@ -60,13 +67,18 @@
                     <input type="text" id="to" name="to">
                   </span>
                   <span><input type="button" class="button red" value="검색하기" onclick="RS.search()"></span>
+                  <span><input type="button" id="export-excel" class="button green ml-10" value="내보내기" onclick="tableToExcel('rs-table', 'export table')"></span>
                 </td>
               </tr>
             </thead>
           </table>
         </div>
         <div class="rs-list mt-20">
-          <table>
+          <table id="rs-table">
+            <colgroup>
+              <col span="4" align="center">
+              <col align="left">
+            </colgroup>
             <thead>
               <tr>
                 <th width="10%">이름</th>
@@ -156,7 +168,7 @@
         html.push('<td>');        
         html.push('<div class="preview-scroll-hidden mh-200">');
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="RS.expandReport('+row.reportidx+')"></div>');
-        html.push(row.report);
+        html.push('<div>'+row.report.replace(/ /gi, '&nbsp').replace(/\n/gi, '<br style="mso-data-placement:same-cell;" />')+'</div>');
         html.push('</div>')
         html.push('</td>');
         html.push('<td>');
@@ -166,6 +178,8 @@
         list.append(html.join(''));
       }		
       RS.sumWorkHour();	
+      $('#rs-table td, #rs-table th').css('border', '1px solid #ddd');
+      $('#rs-table th').css('background-color', '#f4f4f4');
       parent.fncResizeHeight(document);	//resize
     },
     expandReport: function(id){
@@ -204,16 +218,17 @@
         html.push('<tr class="sum-row" data-member-name='+members[i]+'>');
         html.push('<td>근무시간 합계</td>');
         html.push('<td>');
-        html.push(member_data[members[i]]);
+        html.push(member_data[members[i]].toFixed(2));
         html.push('</td>');
         html.push('<td colspan=3></td>')
         html.push('</tr>');
         
         $('tr[data-member-name='+members[i]+']:last').after(html.join(''));
-        
         var row_count = $('tr[data-member-name='+members[i]+']').length;
         $('tr[data-member-name='+members[i]+']:first th').attr('rowspan', row_count);
       }
+      // for excel export
+      $('.sum-row td').css('background-color', 'lightyellow');
     },
     
     setMemeberSelect: function(){
@@ -283,6 +298,37 @@
     RS.setMemeberSelect();
     RS.search();
   });
+
+  var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+                var blob = new Blob([format(template, ctx)]);
+                var blobURL = window.URL.createObjectURL(blob);
+
+                if (ifIE()) {
+                    csvData = table.innerHTML;
+                    if (window.navigator.msSaveBlob) {
+                        var blob = new Blob([format(template, ctx)], {
+                            type: "text/html"
+                        });
+                        navigator.msSaveBlob(blob, '' + name + '.xls');
+                    }
+                }
+                else
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })();
+
+  function ifIE() {
+    var isIE11 = navigator.userAgent.indexOf(".NET CLR") > -1;
+    var isIE11orLess = isIE11 || navigator.appVersion.indexOf("MSIE") != -1;
+      return isIE11orLess;
+  }
 </script>
 </body>
 </html>

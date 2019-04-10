@@ -11,7 +11,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
@@ -46,6 +46,7 @@
                 </span> -->
                 <span class="project-select"></span>
                 <span><input type="button" class="button red" value="추가하기" onclick="AddReport.addWork()"></span>
+                <span><input type="button" class="button red" value="임시저장" onclick="AddReport.draft()"></span>
               </td>
             </tr>
           </thead>
@@ -109,22 +110,47 @@
     parent.fncResizeHeight(document);
     //parent.document.querySelector('#C2ScontentsFrame').height='1000px';
 
-    if(localStorage.reportBackup){
-      Report.confirm('작성중이던 보고서가 있습니다. 불러오시겠습니까?', function(b){
-        if(!b) {localStorage.reportBackup=''; return;}
+    //자동저장 내역 확인 및 불러오기
+    Report.get('getDraft').then(function(res){
+      if(res && res.length>0){        
+        Report.confirm('작성중이던 보고서가 있습니다. 불러오시겠습니까?', function(b){
+          if(!b) {localStorage.reportBackup=''; return;}
 
-        //백업된것 붙인다.
-        $('.work-list tbody').html(localStorage.reportBackup);
-        AddReport.summary();
-      })
-    }
-
-    AddReport.autoBackup = setInterval(() => {
-      // 임시 백업
-      // 가라로 한거니 바꾸는게 좋을듯. 파싱해서 서버에 저장하는게 낫지않을까
-      if($('.work-list tbody').html().trim().length > 0) localStorage.reportBackup = $('.work-list tbody').html();
-      console.log('localStorage.reportBackup='+localStorage.reportBackup);
+          //백업된것 붙인다.
+          AddReport.renderRows(res);
+          AddReport.summary();
+        });        
+      }
+    });
+    //자동저장, 1분간격, 작성된게 있을때만 저장한다.
+    AddReport.autoBackup = setInterval(function(){       
+      if($('.work-list tbody').html().trim().length > 0) AddReport.draft();
     }, 1*60*1000);
+    /*
+    if (typeof localStorage!='undefined') {
+      // 야호! 우리는 localStorage를 사용할 수 있습니다.
+      if(localStorage.reportBackup){
+        Report.confirm('작성중이던 보고서가 있습니다. 불러오시겠습니까?', function(b){
+          if(!b) {localStorage.reportBackup=''; return;}
+
+          //백업된것 붙인다.
+          AddReport.renderRows(JSON.parse(localStorage.reportBackup));
+          AddReport.summary();
+        })
+      }
+
+      AddReport.autoBackup = setInterval(function(){
+        // 임시 백업
+        // 가라로 한거니 바꾸는게 좋을듯. 파싱해서 서버에 저장하는게 낫지않을까
+        //if($('.work-list tbody').html().trim().length > 0) localStorage.reportBackup = JSON.stringify(AddReport.draft());
+        if($('.work-list tbody').html().trim().length > 0) AddReport.draft();
+
+      }, 1*60*1000);
+    }
+    else {
+      // 슬픈소식, localStorage를 사용할 수 없습니다.
+    }
+    */
   });
 
   var AddReport = {
@@ -144,38 +170,48 @@
     },   
 
     addWork: function(){
-      var selected_date = $('#datepicker').val();
-      var work_hour = $('#work-hour').val();
-      var project_id = $('#project-name').val();
-      var project_name = $('#project-name option:selected').text();
+      var data = {
+        work_d: $('#datepicker').val(),
+        work_h: $('#work-hour').val(),
+        project_name: $('#project-name option:selected').text(),
+        project_id: $('#project-name').val(),
+        content: '',
+      }
       
-      if(project_id === null) { Report.alert('프로젝트를 선택 해 주세요.'); return; }
-      if(work_hour > 24) { Report.alert('근무시간은 24를 초과 할 수 없습니다.'); return; }
+      if(data.project_id === null) { Report.alert('프로젝트를 선택 해 주세요.'); return; }
+      if(data.work_h > 24) { Report.alert('근무시간은 24를 초과 할 수 없습니다.'); return; }
 
       //var row = $('#row-'+selected_date).length>0 ? $('#row-'+selected_date) : AddReport.createRow(selected_date, work_hour);
-      var row = AddReport.createRow(selected_date, work_hour, project_name, project_id);
+      var row = AddReport.createRow(data);
     },
-    createRow: function(selected_date, work_hour, project_name, project_id){
-      if(!selected_date){
+    createRow: function(data){
+      var work_d = data.work_d;
+      var work_h = Number(data.work_h).toFixed(2);
+      var project_name = data.project_name;
+      var project_id = data.project_id;
+      var content = data.content;
+
+      if(!work_d){
         return;
       }
-      var row_count = $('tr[data-date='+selected_date+']').length      
+
+      var row_count = $('tr[data-date='+work_d+']').length      
       //var row = document.createElement("tr");
       var row = $("<tr></tr>");
       //row.attr('data-row', row_count + 1);
-      row.attr('data-date', selected_date);   
+      row.attr('data-date', work_d);   
       
       var html = [];
       if(row_count>0){
-        $('tr[data-date='+selected_date+']:first > th').attr('rowspan', row_count + 1);
+        $('tr[data-date='+work_d+']:first > th').attr('rowspan', row_count + 1);
       }else{
         html.push('<th>');
-        html.push(selected_date + ' ' + AddReport.getDay(selected_date) + '요일');
+        html.push(work_d + ' ' + AddReport.getDay(work_d) + '요일');
         html.push('</th>');
       }
       html.push('<td>');
-      html.push('<input type="number" id="work-hour" value="'+work_hour+'" step="0.01" min="0" max="24" onchange="AddReport.summary()"/>');
-      //html.push(work_hour);
+      html.push('<input type="number" id="work-hour" value="'+work_h+'" step="0.01" min="0" max="24" onchange="AddReport.summary()"/>');
+      //html.push(work_h);
       html.push('</td>');
       html.push('<td>');
       html.push(AddReport.getProjectSelectHtml(project_name));
@@ -183,7 +219,7 @@
       //html.push(project_name);
       html.push('</td>');
       html.push('<td>');
-      html.push('<textarea placeholder="write here..."></textarea>');
+      html.push('<textarea placeholder="write here...">'+content+'</textarea>');
       html.push('</td>');
       html.push('<td>');
       html.push('<input type="button" class="button blue" value="최근보고" onclick="AddReport.lastReport(this)">');
@@ -193,23 +229,22 @@
       row.html(html.join(''));
       if(row_count>0){
         // 추가되어있는 날짜인경우
-        $('tr[data-date='+selected_date+']:last').after(row);
+        $('tr[data-date='+work_d+']:last').after(row);
       }else{
         // 추가되지 않은 날짜인경우 추가할때 추가되어있는 날짜와 날짜를 비교한다.
         // 오름차순 정렬을 위함임
         var rows = $('tr[data-date]');
         for(var i=0; i < rows.length; i++){
-          console.log('selected_date < rows[i]=', selected_date < $(rows[i]));
-          if(selected_date < $(rows[i]).attr('data-date')){                        
+          if(work_d < $(rows[i]).attr('data-date')){                        
             $(rows[i]).before(row);
             break;
           }
         }
         // 해당 날짜가 추가되지 않았거나 제일 큰 날짜인 경우 뒤에 붙인다
-        if($('tr[data-date='+selected_date+']').length==0){ $('.work-list > table > tbody').append(row);}
+        if($('tr[data-date='+work_d+']').length==0){ $('.work-list > table > tbody').append(row);}
       }
                   
-      AddReport.drawDateLine(selected_date);
+      AddReport.drawDateLine(work_d);
       AddReport.summary();
       parent.fncResizeHeight(document);
       row.find('textarea').focus();
@@ -269,7 +304,7 @@
       //키만 뽑아서 string 생성
       project_name_sum = Object.keys(project_obj).join(', ');
 
-      summary_area.find('td:eq(0)').text(work_time_sum);
+      summary_area.find('td:eq(0)').text(work_time_sum.toFixed(2));
       summary_area.find('td:eq(1)').text(project_name_sum);
     },
     reportSubmit: function(){
@@ -305,7 +340,9 @@
         Report.post('insertReport', data).then(function(res){
           if(res.result){
             //백업된것 삭제
-            localStorage.reportBackup='';
+            //localStorage.reportBackup='';
+            Report.post('deleteDraft');
+
             //interval 중지
             clearInterval(AddReport.autoBackup);
 
@@ -334,7 +371,6 @@
     },
     lastReport: function(e){
       var id = $(e).parent().parent().find('td:eq(1) select').val();
-      console.log(id);
 
       var data = {
         projectIdx: id        
@@ -342,7 +378,6 @@
       Report.get("getLastReportFromProject", data).then(function(res){
 				if(res==null){
           Report.alert('해당 프로젝트의 이전 업무보고가 없습니다.');
-					console.log(res);
 					return;
         }
         AddReport.modalOpen(res);
@@ -410,7 +445,41 @@
       }
       html.push('<select>');
       $('.project-select').html(html.join(''));
-    }
+    },
+
+    draft: function(){
+      //create json data
+      var data = {};
+      var rows = $('.work-list table tbody tr');
+
+      if(rows.length < 1) return;
+
+      for(var i=0; i < rows.length; i++){        
+        var row = rows[i];
+
+        data[i] = {
+          work_d: $(row).attr('data-date'),
+          work_h: Number($(row).find('td:first input[type="number"]').val()),
+          project_name: $(row).find('td:eq(1) > select option:selected').text(),
+          project_id: $(row).find('td:eq(1) > select option:selected').val(),
+          content: $(row).find('textarea').val(),
+        }
+      }
+      //서버 저장
+      Report.post('setDraft', JSON.stringify(data));
+
+      return data;
+    },
+
+    renderRows: function(rows) {
+      //json 형태로 작성된 내용을 받아 table 내에 각 행들을 그린다.
+      var list = $('.work-list tbody');
+      list.html(''); //초기화
+      for(var num in rows){        
+        row = rows[num];
+        AddReport.createRow(row);
+			}			
+		},
   }
 </script>
 </body>
