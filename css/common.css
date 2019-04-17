@@ -147,6 +147,20 @@
 .d-n {
     display: none;
 }
+input::-webkit-credentials-auto-fill-button {
+    /*
+    safari에서 자동완성으로 아이콘이 나오는 문제 처리
+    ex) number 필드에서 사람아이콘이 나온다던가 함
+    */
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+.plain-text {
+    white-space: pre-wrap;
+    font-family: sans-serif;
+}
 .overlay {
     display:none;
     width:100%; 
@@ -206,4 +220,11 @@
 }
 .alert .modal-footer, .confirm .modal-footer {
     font-size: 15px;   
+}
+
+#chart1, #chart2, #pie1 {
+	min-width: 310px;
+	max-width: 800px;
+	height: 300px;
+    margin: 0 auto;
 }

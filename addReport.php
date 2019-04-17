@@ -46,7 +46,7 @@
                 </span> -->
                 <span class="project-select"></span>
                 <span><input type="button" class="button red" value="추가하기" onclick="AddReport.addWork()"></span>
-                <span><input type="button" class="button red" value="임시저장" onclick="AddReport.draft()"></span>
+                <!-- <span><input type="button" class="button red" value="임시저장" onclick="AddReport.draft()"></span> -->
               </td>
             </tr>
           </thead>
@@ -114,7 +114,7 @@
     Report.get('getDraft').then(function(res){
       if(res && res.length>0){        
         Report.confirm('작성중이던 보고서가 있습니다. 불러오시겠습니까?', function(b){
-          if(!b) {localStorage.reportBackup=''; return;}
+          if(!b) {return;}
 
           //백업된것 붙인다.
           AddReport.renderRows(res);

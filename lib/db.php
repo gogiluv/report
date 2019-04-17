@@ -184,7 +184,7 @@
 			return json_encode($rows);
 		} catch (Throwable $e) {
 			//$msg = $e->getMessage();
-			return json_encode(array("error"=>$e->getMessage()));
+			return json_encode(array("error"=>$e->getMessage(), "result"=>$result));
 		}		
 	}
 

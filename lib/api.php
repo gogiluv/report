@@ -32,7 +32,8 @@
 
     $reportIdx = $data["reportIdx"];
 
-		$sql = sprintf("SELECT er.ReportIdx, er.MemberIdx, er.work_d, er.work_h, er.ProjectIdx, er.create_dt, er.Report, ep.ProjectName FROM ECO_Reports as er
+		$sql = sprintf("SELECT er.ReportIdx, er.MemberIdx, er.work_d, er.work_h, 
+                    er.ProjectIdx, er.create_dt, er.Report, ep.ProjectName FROM ECO_Reports as er
                     inner join ECO_Project as ep
                     on  er.projectidx = ep.projectidx
                     WHERE reportIdx=%d", $reportIdx);
@@ -503,6 +504,7 @@
     return json_encode($reported_arr);
   }
 
+  //자동저장
   function setDraft($data){
     if(SessionCheck() == false) {
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));
@@ -524,6 +526,7 @@
     return json_encode(array("result"=>$result));
   }
 
+  // 자동저장 불러오기
   function getDraft(){
     if(SessionCheck() == false) {
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));
@@ -547,7 +550,7 @@
     $draft = $result->fetch_assoc();  //limit 1이기 때문에 한번만 수행하면 된다.
     return json_encode(json_decode($draft['draft'], true));
   }
-
+  // 자동저장 삭제
   function deleteDraft(){
     if(SessionCheck() == false) {
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));
@@ -568,5 +571,147 @@
     return json_encode(array("result"=>$result));
   }
 
+  // 월 근무시간 합계 - 월 지정
+  function getSumWorkHourFromMonth($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $year = $data['year'];
+    $month = $data['month'];
+
+    $sql = sprintf("SELECT year(work_d) as year, month(work_d) as month, sum(work_h) as sum_work_h
+                    FROM ECO_Reports where MemberIdx=%d and year(work_d)=%d and month(work_d)=%d 
+                    group by year(work_d), month(work_d)", $memberIdx, $year, $month);
+    $link = DBConnect();    
+    $result = mysqli_query($link, $sql);    
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    $row = $result->fetch_assoc();  // 년/월로 조회하기때문에 한번만 수행하면됨
+
+    mysqli_close($link);
+    return json_encode($row);
+    //return mysqli_result_to_json($result);
+  }
+
+  // 월 근무시간 합계 - 최근 n 개월
+  function getSumWorkHourFromRecentMonth($data) {
+    if(SessionCheck() == false) {
+      echo json_encode(array("error"=>"로그인 필요"));
+      return;
+    }
+  
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $limit = $data['limit'];
+
+    $sql = sprintf("SELECT * from (SELECT year(work_d) as year, 
+                    month(work_d) as month, sum(work_h) as sum_work_h
+                    FROM ECO_Reports where MemberIdx=%d
+                    group by year(work_d), month(work_d) 
+                    order by work_d desc limit %d) as A
+                    order by year, month asc", $memberIdx, $limit);
+    $link = DBConnect();    
+    $result = mysqli_query($link, $sql);    
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+  
+    mysqli_close($link);     
+    return mysqli_result_to_json($result);
+  }
+
+  //근무일(보고서가 제출된 날) count
+  function getWorkDayCount($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $year = $data['year'];
+    $month = $data['month'];
+
+    $sql = sprintf("SELECT count(work_d) as count_work_d from (SELECT work_d from ECO_Reports 
+                    where MemberIdx=%d and year(work_d)=%d and month(work_d)=%d 
+                    group by work_d) as report_date", $memberIdx, $year, $month);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    $row = $result->fetch_assoc();  // 년/월로 조회하기때문에 한번만 수행하면됨
+
+    mysqli_close($link);
+    return json_encode($row);
+    //return mysqli_result_to_json($result);
+  }
+
+  //주말 근무일 count
+  function getWorkDayCountFromWeekend($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $year = $data['year'];
+    $month = $data['month'];
+
+    $sql = sprintf("SELECT count(work_d) as count_work_d from (SELECT work_d from ECO_Reports 
+                    where MemberIdx=%d and year(work_d)=%d and month(work_d)=%d and dayofweek(work_d) in (1,7) 
+                    group by work_d) as report_date", $memberIdx, $year, $month);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    $row = $result->fetch_assoc();  // 년/월로 조회하기때문에 한번만 수행하면됨
+
+    mysqli_close($link);
+    return json_encode($row);
+    //return mysqli_result_to_json($result);
+  }
+
+  // 최근 n일간의 하루당 근무시간을 가져온다
+  function getWorkHourPerDay($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $limit = $data['limit'];
+
+    $sql = sprintf("SELECT * from (SELECT work_d, sum(work_h) as work_h from ECO_Reports 
+                    where memberidx = %d group by work_d 
+                    order by work_d desc limit %d) as A order by work_d asc", $memberIdx, $limit);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);
+  }
+
+  //최근한달간 프로젝트별 업무시간 합계
+  function getWorkHourPerProject() {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $memberIdx = $_SESSION['report_login_userIdx'];
+    $sql = sprintf("SELECT er.projectidx, ep.ProjectName, sum(er.work_h) as sum_work_h 
+                    FROM ECO_Reports as er inner join ECO_Project as ep on er.ProjectIdx=ep.ProjectIdx 
+                    where er.memberidx=%d and work_d>=now()-INTERVAL 1 month 
+                    group by er.ProjectIdx",$memberIdx);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);    
+  }
 
 ?>

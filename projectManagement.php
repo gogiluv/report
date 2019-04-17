@@ -117,17 +117,17 @@
       //   html.push('<label for="radio-'+num+'-2">비활성</label>')
       //   html.push('<input type="radio" name="radio-'+num+'" id="radio-'+num+'-2"  value="0" />');    
       // }
-      html.push(`<fieldset>
-                   <legend>Select a Location: </legend>
-                   <label for="radio-`+row.ProjectIdx+`-1">활성</label>
-                   <input type="radio" name="radio-`+row.ProjectIdx+`-1" id="radio-`+row.ProjectIdx+`-1" 
-                   value="1" data-proejctIdx="`+row.ProjectIdx+`" 
-                   onclick="PM.projectStatusChange(`+row.ProjectIdx+`, 1)" `+(row.is_enabled==1?'checked':'')+`>
-                   <label for="radio-`+row.ProjectIdx+`-2">비활성</label>
-                   <input type="radio" name="radio-`+row.ProjectIdx+`-1" id="radio-`+row.ProjectIdx+`-2" 
-                   value="0" data-proejctIdx="`+row.ProjectIdx+`" 
-                   onclick="PM.projectStatusChange(`+row.ProjectIdx+`, 0)" `+(row.is_enabled==0?'checked':'')+`>
-                 </fieldset>`);
+      html.push('<fieldset>\
+                   <legend>Select a Location: </legend>\
+                   <label for="radio-'+row.ProjectIdx+'-1">활성</label>\
+                   <input type="radio" name="radio-'+row.ProjectIdx+'-1" id="radio-'+row.ProjectIdx+'-1" \
+                   value="1" data-proejctIdx="'+row.ProjectIdx+'" \
+                   onclick="PM.projectStatusChange('+row.ProjectIdx+', 1)" '+(row.is_enabled==1?"checked":'')+'>\
+                   <label for="radio-'+row.ProjectIdx+'-2">비활성</label>\
+                   <input type="radio" name="radio-'+row.ProjectIdx+'-1" id="radio-'+row.ProjectIdx+'-2" \
+                   value="0" data-proejctIdx="'+row.ProjectIdx+'" \
+                   onclick="PM.projectStatusChange('+row.ProjectIdx+', 0)" '+(row.is_enabled==0?"checked":"")+'>\
+                 </fieldset>');
       html.push('</td>');
       html.push('<td>');
       //html.push('<a href="#" class="button red">삭제</a>');

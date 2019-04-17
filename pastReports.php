@@ -154,7 +154,8 @@
         html.push('<td>');
         html.push('<div class="preview-scroll-hidden mh-200">');
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+row.reportidx+')"></div>');
-        html.push(row.report);
+        //html.push(row.report.replace(/</gi, '&lt'));
+        html.push('<pre class="plain-text">'+row.report+'</pre>');
         html.push('</div>')
 				html.push('</td>');
         html.push('<td>');
@@ -234,7 +235,7 @@
         $(row).find('td:eq(2)').css('height', '');
         $(row).find('td:eq(2)').html(
           '<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="PR.expandReport('+res.ReportIdx+')"></div>'
-          +'<div class="preview-scroll-hidden mh-200">'+res.Report+'</div>'
+          +'<div class="preview-scroll-hidden mh-200"><pre class="plain-text">'+res.Report+'</pre></div>'
         );        
         $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+res.ReportIdx+')">'
           + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+res.ReportIdx+')">');        

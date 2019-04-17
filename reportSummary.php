@@ -168,7 +168,9 @@
         html.push('<td>');        
         html.push('<div class="preview-scroll-hidden mh-200">');
         html.push('<div class="ui-icon ui-icon-arrow-4-diag btn expand-btn" onclick="RS.expandReport('+row.reportidx+')"></div>');
-        html.push('<div>'+row.report.replace(/ /gi, '&nbsp').replace(/\n/gi, '<br style="mso-data-placement:same-cell;" />')+'</div>');
+        //pre 태그내에 mso-data-placement:same-cell 설정을 줄 수 없어서 다음과 같이 처리한다
+        html.push('<div>'+row.report.replace(/</gi, '&lt').replace(/ /gi, '&nbsp').replace(/\n/gi, '<br style="mso-data-placement:same-cell;" />')+'</div>');
+        //html.push('<div><pre class="plain-text" style="mso-data-placement:same-cell;">'+row.report+'</pre></div>');
         html.push('</div>')
         html.push('</td>');
         html.push('<td>');
