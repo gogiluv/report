@@ -56,7 +56,7 @@
           </table>
         </div>
 			</div>
-			<div class="tabcontents etc" id="tabcontents2">
+			<div class="tabcontents etc" id="tabcontents2" style="display:none;">
         <div class="create-area">
           <table>
             <thead>
@@ -103,7 +103,7 @@
     var html = [];
     for(var num in rows){
       var row = rows[num];
-      html.push('<tr>');
+      html.push('<tr data-project-id='+row.ProjectIdx+'>');
       html.push('<td>');
       html.push(row.ProjectIdx);
       html.push('</td>');
@@ -111,26 +111,21 @@
       html.push(row.ProjectName);
       html.push('</td>');
       html.push('<td>');
-      // if(row.is_enabled){
-      //   html.push('<label for="radio-'+num+'-1">활성</label>')
-      //   html.push('<input type="radio" name="radio-'+num+'" id="radio-'+num+'-1" value="1" checked>');
-      //   html.push('<label for="radio-'+num+'-2">비활성</label>')
-      //   html.push('<input type="radio" name="radio-'+num+'" id="radio-'+num+'-2"  value="0" />');    
-      // }
       html.push('<fieldset>\
                    <legend>Select a Location: </legend>\
-                   <label for="radio-'+row.ProjectIdx+'-1">활성</label>\
+                   <label for="radio-'+row.ProjectIdx+'-1" style="width:36px;">활성</label>\
                    <input type="radio" name="radio-'+row.ProjectIdx+'-1" id="radio-'+row.ProjectIdx+'-1" \
                    value="1" data-proejctIdx="'+row.ProjectIdx+'" \
                    onclick="PM.projectStatusChange('+row.ProjectIdx+', 1)" '+(row.is_enabled==1?"checked":'')+'>\
-                   <label for="radio-'+row.ProjectIdx+'-2">비활성</label>\
+                   <label for="radio-'+row.ProjectIdx+'-2" style="width:36px;">비활성</label>\
                    <input type="radio" name="radio-'+row.ProjectIdx+'-1" id="radio-'+row.ProjectIdx+'-2" \
                    value="0" data-proejctIdx="'+row.ProjectIdx+'" \
                    onclick="PM.projectStatusChange('+row.ProjectIdx+', 0)" '+(row.is_enabled==0?"checked":"")+'>\
                  </fieldset>');
       html.push('</td>');
       html.push('<td>');
-      //html.push('<a href="#" class="button red">삭제</a>');
+      html.push('<a href="#" class="button blue" onclick="PM.modifyForm('+row.ProjectIdx+')">수정</a> ');
+      html.push('<a href="#" class="button red" onclick="PM.deleteProject('+row.ProjectIdx+')">삭제</a>');
       html.push('</td>');
       html.push('</tr>');            
     }
@@ -186,7 +181,65 @@
       }
     });
     $('[data-tab="etc"]').click();
-  }  
+  },
+  modifyForm: function(id) {
+    var projectName =  $('tr[data-project-id='+id+'] td:eq(1)').text();
+    $('tr[data-project-id='+id+'] td:eq(1)').html('<input type="text" class="input-style-01" value="'+projectName+'"/>');
+    $('tr[data-project-id='+id+'] td:last').html('\
+      <a href="#" class="button red" onclick="PM.modifyConfirm('+id+')">확인</a>\
+      <a href="#" class="button blue" onclick="PM.resetForm('+id+')">취소</a>');
+  },
+  modifyConfirm: function(id) {
+    var row = $('tr[data-project-id='+id+']');      
+    var data = {
+      projectIdx: id,
+      projectName: $(row).find('td:eq(1) input').val()
+    }
+    Report.get("updateProject", data).then(function(res){
+      if(res.result){
+        PM.resetForm(id);
+      }
+    });
+  },
+  deleteProject: function(id) {
+    Report.get("deleteProject", {projectIdx: id}).then(function(res){
+      if(res.result===true){
+        Report.alert('삭제되었습니다');
+        $('tr[data-project-id='+id+']').remove();
+      }else if(res.result==='has report') {
+        Report.alert('해당 프로젝트로 작성된 보고서가 있습니다.\n\n관리자에게 문의 해 주세요');
+      }else {
+        Report.alert('삭제 실패. 관리자에게 문의 해 주세요');
+      }
+    });
+  },
+  resetForm: function(id) {
+    var row = $('tr[data-project-id='+id+']');
+    var data = {
+      projectIdx: id
+    }
+    Report.get("getProjectFromId", data).then(function(res){
+      $(row).find('td:eq(0)').text(Number(res.ProjectIdx));
+      $(row).find('td:eq(1)').text(res.ProjectName);
+      $(row).find('td:eq(2)').html('\
+                  <fieldset>\
+                    <legend>Select a Location: </legend>\
+                    <label for="radio-'+id+'-1" style="width:36px;">활성</label>\
+                    <input type="radio" name="radio-'+id+'-1" id="radio-'+id+'-1" \
+                    value="1" data-proejctIdx="'+id+'" \
+                    onclick="PM.projectStatusChange('+id+', 1)" '+(res.is_enabled==1?"checked":'')+'>\
+                    <label for="radio-'+id+'-2" style="width:36px;">비활성</label>\
+                    <input type="radio" name="radio-'+id+'-1" id="radio-'+id+'-2" \
+                    value="0" data-proejctIdx="'+id+'" \
+                    onclick="PM.projectStatusChange('+id+', 0)" '+(res.is_enabled==0?"checked":"")+'>\
+                  </fieldset>');
+      $(row).find('td:eq(3)').html('\
+                  <a href="#" class="button blue" onclick="PM.modifyForm('+id+')">수정</a>\
+                  <a href="#" class="button red" onclick="PM.deleteProject('+id+')">삭제</a>')
+        //jquery ui radio active
+      $( 'input[type="radio"]' ).checkboxradio({icon: false});
+    });
+  }
  }
 
  //init

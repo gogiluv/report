@@ -13,16 +13,22 @@
     border: 0px;
 }
 .work-list table tbody tr textarea:focus, .create-area input:focus, .select-area input:focus, 
-.pr-list table tbody tr textarea:focus, .pr-list input[type="number"], .work-list input[type="number"] {
+.pr-list table tbody tr textarea:focus, .pr-list input[type="number"], .work-list input[type="number"],
+.input-style-01  {
     outline: none;
 }
 .create-area input[type="number"], .create-area input[type="text"], .create-area select, .work-list select, .work-list input[type="number"],
-.select-area select, .select-area input:not([type="button"]), .pr-list select, .pr-list input[type="number"] {
+.select-area select, .select-area input:not([type="button"]), .pr-list select, .pr-list input[type="number"], .input-style-01 {
     border: 0px;
     border-bottom: 1px solid lightgray;
     padding: 0px; 
     font-size: 13px;
     text-align-last: center;
+}
+.input-style-02 {
+    border: 0px;
+    padding: 0px; 
+    font-size: 13px;
 }
 .create-area input[type="text"], .select-area input[type="text"] {
     width: 80px;
@@ -147,6 +153,18 @@
 .d-n {
     display: none;
 }
+.w-450 {
+    width: 450px;
+}
+.w-200 {
+    width: 200px;
+}
+.w-100 {
+    width: 100px;
+}
+.fs-15 {
+    font-size: 15px;
+}
 input::-webkit-credentials-auto-fill-button {
     /*
     safari에서 자동완성으로 아이콘이 나오는 문제 처리
@@ -222,9 +240,10 @@ input::-webkit-credentials-auto-fill-button {
     font-size: 15px;   
 }
 
-#chart1, #chart2, #pie1 {
+#chart1, #chart2, #pie1, #stack1 {
 	min-width: 310px;
 	max-width: 800px;
 	height: 300px;
-    margin: 0 auto;
+    margin: 10px auto;
+    border-bottom: 1px solid lightgray;
 }

@@ -63,7 +63,7 @@
                     </tr>
                     <tr>
                         <td colspan="2" style="color: red; font-size: 15pt;">
-							<div style="margin-top: 10px; margin-bottom: 10px;"><?php echo $noticeTitle ?> - explorer에서는 오류가 발생 할 수 있습니다.</div>
+							<div style="margin-top: 10px; margin-bottom: 10px;"><?php echo $noticeTitle ?></div>
                         </td>
                     </tr>
                     <tr>

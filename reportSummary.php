@@ -23,8 +23,6 @@
     return;
 	}
 
-  //팀원 list
-  $members = getMemberAll(null);
 ?>
 <!DOCTYPE html>
 <html>
@@ -56,7 +54,6 @@
                   <select id="name">
                   </select>
                 </td>
-
                 <td>
                   <span>
                     <label for="from">업무일</label>

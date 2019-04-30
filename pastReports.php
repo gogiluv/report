@@ -41,7 +41,7 @@
   <div>    
     <div class="boardtype2" style="width:auto; max-width:1300px;">
       <div class="select-area">
-        <table style="width:400px;">
+        <table style="width:auto;">
           <thead>
             <tr>
               <td>
@@ -96,10 +96,13 @@
 		search: function() {
 			var data = {
 				from: $('#from').val(),
-				to: $('#to').val()
+        to: $('#to').val(),
+        //TODO
+        memberIdx: $('#name').val()
       }
       
 			Report.get('getPastReports', data).then(function(res){
+        if(res.error) return;
         PR.renderRows(res);
 			});
     },
@@ -238,7 +241,10 @@
           +'<div class="preview-scroll-hidden mh-200"><pre class="plain-text">'+res.Report+'</pre></div>'
         );        
         $(row).find('td:eq(3)').html('<input type="button" class="button blue mr-10" value="수정" onclick="PR.modifyForm('+res.ReportIdx+')">'
-          + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+res.ReportIdx+')">');        
+          + '<input type="button" class="button red" value="삭제" onclick="PR.deleteRow('+res.ReportIdx+')">');
+        
+        //resize
+        parent.fncResizeHeight(document);  
       });
     },
 
@@ -274,6 +280,22 @@
     setProjects: function(){
       Report.get("getProjects").then(function(res){
         PR.projects = res;
+      });
+    },
+
+    setMemberSelect: function(){
+      Report.get("getMembersForSummary").then(function(data){
+        var html = [];        
+        html.push('<td>');
+        html.push('<select id="name">');
+        html.push('<option value="" disabled selected>팀원 선택</option>');
+        for(var i in data){
+          html.push('<option value='+data[i].MemberIdx+'>'+data[i].MemberName+'</option>');
+        }
+        html.push('</select>');
+        html.push('</td>');        
+        $('.select-area table thead tr').prepend(html.join(''));
+        parent.fncResizeHeight(document);     
       });
     }
 	}
@@ -330,6 +352,10 @@
     
     PR.search();
     PR.setProjects();
+    //init
+    Report.get('getLevel').then(function(res){
+      if(res.level >= 3) PR.setMemberSelect();    
+    })
   });
 </script>
 </body>

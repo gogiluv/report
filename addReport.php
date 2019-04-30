@@ -37,7 +37,11 @@
               <th scope="col">업무 내역 추가</th>
               <td>
                 <span><label for="datepicker">근무일</label><input type="text" id="datepicker" readonly/></span>
-                <span><label for="work-hour">근무시간</label><input type="number" id="work-hour" value="0.00" step="0.01" min="0" max="24"/></span>
+                <span>
+                  <label for="work-hour">근무시간</label>
+                  <input type="number" id="work-hour" value="0.00" step="0.10" min="0" max="24" onchange="AddReport.toTime(this)"/>
+                </span>
+                <span>(n시간 n분)</span>
                 <!-- <span>
                   <label for="work-hour">근무시간</label>
                   <input type="number" id="hour" value="0" step="1" min="0" max="23"/>시간
@@ -210,7 +214,7 @@
         html.push('</th>');
       }
       html.push('<td>');
-      html.push('<input type="number" id="work-hour" value="'+work_h+'" step="0.01" min="0" max="24" onchange="AddReport.summary()"/>');
+      html.push('<input type="number" id="work-hour" value="'+work_h+'" step="0.10" min="0" max="24" onchange="AddReport.summary()"/>');
       //html.push(work_h);
       html.push('</td>');
       html.push('<td>');
@@ -480,6 +484,15 @@
         AddReport.createRow(row);
 			}			
 		},
+    toTime: function(e){
+      var element = $(e);
+      var work_hour = Number(element.val());
+      
+      var min = work_hour%1.00;
+      var hour = work_hour-min;
+
+      element.parent().parent().find('span:eq(2)').text('('+hour+'시간 '+(min*60).toFixed(0)+'분)');
+    }
   }
 </script>
 </body>

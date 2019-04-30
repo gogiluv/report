@@ -199,16 +199,23 @@
 			return;			
     }
 
-		$memberIdx = $_SESSION['report_login_userIdx'];
-    
+    $level = $_SESSION["report_login_level"];
+    $memberIdx = $_SESSION['report_login_userIdx'];
+
+    if($level>2) {
+			$member_sql = '';
+    } else {
+      $member_sql = sprintf('and memberidx=%d', $memberIdx);
+    }
+
 		/*
 		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
 		*/		
 		   
 	  $sql = sprintf("UPDATE ECO_Reports SET work_h=%f, projectidx=%d, report='%s' 
-                    where reportidx=%d and memberidx=%d", 
+                    where reportidx=%d %s", 
                     $data["work_hour"], $data["project_id"], 
-                    @addslashes($data["content"]), $data["report_id"], $memberIdx);		
+                    @addslashes($data["content"]), $data["report_id"], $member_sql);		
     $link = DBConnect();
     $result = mysqli_query($link, $sql);
 
@@ -224,6 +231,14 @@
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));			
 			return;			
     }
+
+    // 2레벨 이상이어야한다, 파트장님 = 2레벨
+    $level = $_SESSION["report_login_level"];
+		
+		if($level<2) {
+      echo json_encode(array("error"=>"authentification error"));
+			return;
+		}
 
 		//레벨 3 미만의 멤버만 가져온다
     //관리자 = 99, 팀장님 = 3
@@ -287,8 +302,17 @@
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));			
 			return;			
     }
-    
-    $memberIdx = $_SESSION['report_login_userIdx'];
+
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
 
     $sql = sprintf("SELECT er.reportidx, er.memberidx, er.work_d, er.work_h, er.report, ep.projectname 
                   FROM ECO_Reports as er INNER JOIN ECO_Project as ep
@@ -312,8 +336,16 @@
 			return;
     }
 
+    $level = $_SESSION["report_login_level"];
     $memberIdx = $_SESSION['report_login_userIdx'];
-    $sql = sprintf("DELETE FROM ECO_Reports where reportidx=%d and memberidx=%d", $data["reportIdx"], $memberIdx);
+
+    if($level>2) {
+			$member_sql = '';
+    } else {
+      $member_sql = sprintf('and memberidx=%d', $memberIdx);
+    }
+
+    $sql = sprintf("DELETE FROM ECO_Reports where reportidx=%d", $data["reportIdx"], $member_sql);
     $link = DBConnect();
     $result = mysqli_query($link, $sql);
     if(!$result) $result = mysqli_error($link);
@@ -421,11 +453,30 @@
     return mysqli_result_to_json($result);
   }
 
-  function getMembers(){
-		//레벨 3 미만의 멤버만 가져온다
-    //관리자 = 99, 팀장님 = 3		
+  function getMembers($data){
+    $visible_sql = "";
+    
+    if(isset($data['visible']) && $data['visible']!=null){
+      $visible_sql = sprintf("and visible=%d", $data['visible']);
+    }
+
+    $memberName_sql = "";
+    if(isset($data['memberName'])){
+      $memberName_sql = sprintf("and memberName like '%%%s%%'", addslashes($data['memberName']));
+    }
+    // 본인 레벨 이하만 가져온다, 관리자만 관리자 정보 확인, 수정할 수 있게 하기 위함
+    // 관리자 = 99, 팀장님 = 3
+    $level = $_SESSION["report_login_level"];
+
     $link = DBConnect();
-		$result = mysqli_query($link, "SELECT * FROM ECO_Member where visible=1 and levelidx < 3 order by memberidx");    
+    $sql = sprintf("SELECT MemberIdx, MemberName, LevelIdx, Visible, pos.name as Position, par.name as Part
+                    FROM ECO_Member as em 
+                    inner join ECO_Position as pos on em.positionidx = pos.positionidx
+                    inner join ECO_Part as par on em.partidx = par.partidx 
+                    where em.levelidx<=%d %s %s 
+                    order by em.visible desc, em.membername asc", $level, $visible_sql, $memberName_sql);
+
+		$result = mysqli_query($link, $sql);
     //mysql error    
     if(!$result) $result = mysqli_error($link);
 
@@ -578,7 +629,18 @@
 			return;
     }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+    $level = $_SESSION["report_login_level"];
+		
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+    //$memberIdx = $_SESSION['report_login_userIdx'];
+    
     $year = $data['year'];
     $month = $data['month'];
 
@@ -602,8 +664,18 @@
       echo json_encode(array("error"=>"로그인 필요"));
       return;
     }
-  
-    $memberIdx = $_SESSION['report_login_userIdx'];
+
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+    //$memberIdx = $_SESSION['report_login_userIdx'];
     $limit = $data['limit'];
 
     $sql = sprintf("SELECT * from (SELECT year(work_d) as year, 
@@ -628,7 +700,18 @@
 			return;
     }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+
+    //$memberIdx = $_SESSION['report_login_userIdx'];
     $year = $data['year'];
     $month = $data['month'];
 
@@ -653,7 +736,17 @@
 			return;
     }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+    //$memberIdx = $_SESSION['report_login_userIdx'];
     $year = $data['year'];
     $month = $data['month'];
 
@@ -678,7 +771,17 @@
 			return;
     }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+    //$memberIdx = $_SESSION['report_login_userIdx'];
     $limit = $data['limit'];
 
     $sql = sprintf("SELECT * from (SELECT work_d, sum(work_h) as work_h from ECO_Reports 
@@ -694,13 +797,24 @@
   }
 
   //최근한달간 프로젝트별 업무시간 합계
-  function getWorkHourPerProject() {
+  function getWorkHourPerProject($data) {
     if(SessionCheck() == false) {
 			echo json_encode(array("error"=>"로그인 필요"));
 			return;
     }
 
-    $memberIdx = $_SESSION['report_login_userIdx'];
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+    //$memberIdx = $_SESSION['report_login_userIdx'];
+
     $sql = sprintf("SELECT er.projectidx, ep.ProjectName, sum(er.work_h) as sum_work_h 
                     FROM ECO_Reports as er inner join ECO_Project as ep on er.ProjectIdx=ep.ProjectIdx 
                     where er.memberidx=%d and work_d>=now()-INTERVAL 1 month 
@@ -712,6 +826,289 @@
     mysqli_close($link);
 
     return mysqli_result_to_json($result);    
+  }
+  //최근 n일간 일별 프로젝트 시간
+  function getWorkHourPerDayAndProject($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"로그인 필요"));
+			return;
+    }
+
+    $level = $_SESSION["report_login_level"];
+
+    if($level<3) {
+			$memberIdx = $_SESSION['report_login_userIdx'];
+    } else if(isset($data['memberIdx'])){
+      $memberIdx = $data['memberIdx'];
+    } else {
+      echo json_encode(array("error"=>"memberIdx none"));
+      return;
+    }
+
+    //마지막 보고서 제출날짜
+    $link = DBConnect();
+
+    $work_d_sql = sprintf("SELECT work_d from ECO_Reports where memberidx=%d order by work_d desc limit 1", $memberIdx);
+    $work_d_result = mysqli_query($link, $work_d_sql);
+
+    $latest_work_d = $work_d_result->fetch_assoc()['work_d'];
+
+    $day = $data['day'];
+
+    $sql = sprintf("SELECT er.work_d, er.work_h, ep.ProjectName
+                    FROM ECO_Reports as er 
+                    inner join ECO_Project as ep on er.ProjectIdx = ep.ProjectIdx 
+                    WHERE er.memberidx=%d and er.work_d >= (DATE('%s')-INTERVAL %d DAY)  
+                    group by er.ProjectIdx, er.work_d 
+                    order by er.work_d asc",$memberIdx, $latest_work_d, $day);
+    
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);    
+  }
+
+  //프로젝트 관리
+  function getProjectFromId($data) {
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+    $link = DBConnect();
+
+    $projectIdx = $data["projectIdx"];
+
+		$sql = sprintf("SELECT * from ECO_Project WHERE projectIdx=%d", $projectIdx);
+    
+    $result = mysqli_query($link, $sql);
+    if(!$result) $result = mysqli_error($link);
+    // id는 pk이기때문에 하나밖에 없다
+    // fetch_assoc으로 한행만 뽑음
+    $row = $result->fetch_assoc();
+
+		mysqli_close($link);    
+    return json_encode($row);
+  }
+  function updateProject($data){
+    if(empty($_SESSION['report_login_user'])) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));			
+			return;			
+    }
+
+		/*
+		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
+		*/		
+		   
+	  $sql = sprintf("UPDATE ECO_Project SET projectname='%s' where projectidx=%d", 
+                    $data["projectName"], $data["projectIdx"]);		
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    //return json_encode(array("result"=>$result));
+    return json_encode(array("result"=>$result));
+  }
+  function deleteProject($data) {
+    if(empty($_SESSION['report_login_user'])) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));			
+			return;
+    }
+
+    // 해당 프로젝트 id로 작성된 보고서가 있는지 체크한다
+    // 해당 프로젝트로 작성된 보고서가 있을시 삭제하지 않는다
+    // 보고서가 해당 프로젝트 id를 참조하기때문에 프로젝트를 삭제하면 보고서 조회가 정상적으로 되지 않게된다
+    $projectIdx = $data['projectIdx'];
+
+    $link = DBConnect();
+    // 보고서 있는지 체크
+    $check_sql = sprintf("SELECT count(*) as count FROM ECO_Reports where projectidx=%d", $projectIdx);
+    $check_result = mysqli_query($link, $check_sql);
+    $row = $check_result->fetch_assoc();
+    //count가 0보다 클경우 삭제하지 않는다
+    if($row['count'] > 0){
+      return json_encode(array("result"=>'has report'));
+    }
+
+    $delete_sql = sprintf("DELETE FROM ECO_Project where projectidx=%d", $projectIdx);
+    
+    $delete_result = mysqli_query($link, $delete_sql);
+    if(!$delete_result) $delete_result = mysqli_error($link);
+
+    mysqli_close($link);
+    return json_encode(array("result"=>$delete_result));
+  }
+
+  function getLevel(){
+    $level = $_SESSION["report_login_level"];
+    return json_encode(array("level"=>$level));
+  }
+
+  function getMemberFromId($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+    $link = DBConnect();
+
+    $memberIdx = $data["memberIdx"];
+
+		$sql = sprintf("SELECT MemberIdx, MemberName, LevelIdx, Visible, PartIdx, PositionIdx, EN 
+                    from ECO_Member WHERE memberIdx=%d", $memberIdx);
+    
+    $result = mysqli_query($link, $sql);
+    if(!$result) $result = mysqli_error($link);
+    // id는 pk이기때문에 하나밖에 없다
+    // fetch_assoc으로 한행만 뽑음
+    $row = $result->fetch_assoc();
+
+		mysqli_close($link);    
+    return json_encode($row);
+  }
+  
+  function getParts(){
+    $sql = sprintf("SELECT * from ECO_Part order by partidx asc");
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);
+  }
+  function getPositions(){
+    $sql = sprintf("SELECT * from ECO_Position order by positionidx asc");
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);
+  }
+
+  function pwdReset($data){
+    $memberIdx = $data['memberIdx'];
+
+    $sql = sprintf("UPDATE ECO_Member SET Password = sha1('1234567') WHERE MemberIdx =%d", $memberIdx);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return json_encode(array("result"=>$result));
+  }
+
+  function modifyMember($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    if(empty($data['memberName'])){
+      return json_encode(array("error"=>"이름 누락"));
+    }else if(empty($data['partIdx'])){
+      return json_encode(array("error"=>"파트 누락"));
+    }else if(empty($data['positionIdx'])){
+      return json_encode(array("error"=>"직급 누락"));
+    }else if(empty($data['visible'])){
+      return json_encode(array("error"=>"상태 누락"));
+    }else if(empty($data['levelIdx'])){
+      return json_encode(array("error"=>"레벨 누락"));
+    }else if(empty($data['EN'])){
+      return json_encode(array("error"=>"사번 누락"));
+    }
+    
+    $sql = sprintf("UPDATE ECO_Member 
+                    Set membername='%s', partidx=%d, 
+                        positionidx=%d, visible=%d,
+                        levelIdx=%d, en='%s'
+                    where memberidx=%d", $data['memberName'], $data['partIdx'], 
+                    $data['positionIdx'], $data['visible'], $data['levelIdx'],
+                    $data['EN'], $data['memberIdx']);
+                    
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return json_encode(array("result"=>$result));                    
+  }
+
+  function addMember($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    if(empty($data['memberName'])){
+      return json_encode(array("error"=>"이름 누락"));
+    }else if(empty($data['partIdx'])){
+      return json_encode(array("error"=>"파트 누락"));
+    }else if(empty($data['positionIdx'])){
+      return json_encode(array("error"=>"직급 누락"));
+    }else if(empty($data['visible'])){
+      return json_encode(array("error"=>"상태 누락"));
+    }else if(empty($data['levelIdx'])){
+      return json_encode(array("error"=>"레벨 누락"));
+    }else if(empty($data['EN'])){
+      return json_encode(array("error"=>"사번 누락"));
+    }
+    
+    $sql = sprintf("INSERT ECO_Member (membername, partidx, positionidx, visible, levelidx, en, password) 
+                    values ('%s', %d, %d, %d, %d, '%s', sha1('1234567'))",
+                    $data['memberName'], $data['partIdx'], $data['positionIdx'], 
+                    $data['visible'], $data['levelIdx'], $data['EN']);
+                    
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return json_encode(array("result"=>$result));
+  }
+
+  function deleteMember($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $level = $_SESSION["report_login_level"];
+    $memberIdx = $data["memberIdx"];
+    
+    //level 3 이상만 삭제 커맨드를 사용 할 수 있음
+    if($level<3) return json_encode(array("error"=>"permission denied"));
+
+    // 해당 멤버가 제출한 보고서가 있는지 확인한다
+    // 제출한 보고서가 있을경우 삭제하지 않는다.
+    $link = DBConnect();
+
+    $check_sql = sprintf("SELECT count(*) AS report_count 
+                            FROM ECO_Reports WHERE memberIdx=%d", $memberIdx);
+    
+    $check_result = mysqli_query($link, $check_sql);     
+    $row = $check_result->fetch_assoc();
+
+    //count가 0보다 클경우 삭제하지 않는다
+    if($row['report_count'] > 0){
+      return json_encode(array("result"=>'has report'));
+    }
+
+    $delete_sql = sprintf("DELETE FROM ECO_Member where memberidx=%d and membername not like '관리자계정'", $memberIdx);
+    $delete_result = mysqli_query($link, $delete_sql);
+
+    if(!$delete_result) $delete_result = mysqli_error($link);
+
+    mysqli_close($link);
+    return json_encode(array("result"=>$delete_result));
   }
 
 ?>

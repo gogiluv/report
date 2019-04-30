@@ -27,9 +27,10 @@
 </head>
 <body>
 <div class="C2Scontent">
-	<h1 class="location">관리메뉴 > 프로젝트별 통계</h1>   
+	<h1 class="location">관리메뉴 > 업무보고 통계</h1>   
   <div class="boardtype2" style="width:auto; max-width:1500px;">
-    <div class="work-time-area">      
+    <div class="select-area"></div>  
+    <div class="work-time-area mt-20">      
       <table style="width:800px;">
         <colgroup width="16%"></colgroup>
         <colgroup width="16%"></colgroup>
@@ -60,8 +61,9 @@
     </div>
     <div class="chart-area mt-20" style="width:800px;">
       <div id="pie1"></div>
-      <div id="chart1"></div>
+      <div id="stack1"></div>
       <div id="chart2"></div>
+      <div id="chart1"></div>
     </div>
   </div>
 </div>
@@ -104,6 +106,7 @@
 
       plotOptions: {
           series: {
+              color: "hotpink",
               label: {
                   connectorAllowed: false
               },
@@ -178,7 +181,7 @@
           }
       },
 
-      colors: ['#6CF', '#39F', '#06C', '#036', '#000'],
+      colors: ['hotpink', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4'],
 
       // Define the data points. All series have a dummy year
       // of 1970/71 in order to be compared on the same x axis. Note
@@ -219,60 +222,179 @@
           name: '업무 별 비율',
           colorByPoint: true,
           data: []
-      }]
-    })
+      }],
+      colors: ['hotpink', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4']
+    }),
+
+    stack1: function(series_data){
+      Highcharts.chart('stack1', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: '일별 업무'
+        },
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: { // don't display the dummy year
+                week: '%m/%e',
+                day: '%m/%e',
+                month: '%m월%e일',
+                year: '%b'
+            },
+            title: {
+                text: '날짜'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '시간'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            floating: false,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x: %m/%e}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: false,
+                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },  
+        series: series_data,
+        colors: ['hotpink', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4']
+      })
+    },
+
+    setMemberSelect: function(){
+      Report.get("getMembersForSummary").then(function(data){
+        var html = [];
+        html.push('<table style="width:100px;">');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<select id="name" onchange="SR.renderStatistics()">');
+        html.push('<option value="" disabled selected>팀원 선택</option>');
+        for(var i in data){
+          html.push('<option value='+data[i].MemberIdx+'>'+data[i].MemberName+'</option>');
+        }
+        html.push('</select>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('</table>');
+        $('.select-area').html(html.join(''));
+        parent.fncResizeHeight(document);     
+      });
+    },
+    renderStatistics: function() {
+      var today = new Date();
+      var memberIdx = $('#name').val();
+      
+      Report.get('getSumWorkHourFromMonth', {year: today.getFullYear(), month: today.getMonth(), memberIdx: memberIdx}).then(function(r1){
+        Report.get('getWorkDayCount', {year: today.getFullYear(), month: today.getMonth(), memberIdx: memberIdx}).then(function(r2){
+          Report.get('getWorkDayCountFromWeekend', {year: today.getFullYear(), month: today.getMonth(), memberIdx: memberIdx}).then(function(r3){
+            $('#last-month-work-h').text('');
+            $('#last-month-report-d').text('');
+            $('#last-month-avg').text('');
+            // check, 보기편하게 여기에 둔다, 좀 비효율
+            if(r1==null || r1.error) return;
+            
+            $('#last-month-work-h').text(r1.sum_work_h);
+            $('#last-month-report-d').text(r2. count_work_d);
+            $('#last-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));
+          });
+        });
+      });
+      Report.get('getSumWorkHourFromMonth', {year: today.getFullYear(), month: today.getMonth()+1, memberIdx: memberIdx}).then(function(r1){
+        Report.get('getWorkDayCount', {year: today.getFullYear(), month: today.getMonth()+1, memberIdx: memberIdx}).then(function(r2){
+          Report.get('getWorkDayCountFromWeekend', {year: today.getFullYear(), month: today.getMonth()+1, memberIdx: memberIdx}).then(function(r3){
+            $('#current-month-work-h').text('');
+            $('#current-month-report-d').text('');
+            $('#current-month-avg').text('');
+            // check, 보기편하게 여기에 둔다, 좀 비효율
+            if(r1==null || r1.error) return;
+
+            $('#current-month-work-h').text(r1.sum_work_h);
+            $('#current-month-report-d').text(r2. count_work_d);
+            $('#current-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));          
+          });
+        });
+      });
+
+      Report.get('getSumWorkHourFromRecentMonth', {limit: 12, memberIdx: memberIdx}).then(function(r1){
+        var data_arr = [];
+
+        for(var i in r1){        
+          data_arr.push([Date.parse(r1[i].year+'-'+r1[i].month), Number(r1[i].sum_work_h)]);
+        }
+        SR.chart1.series[0].update({data: data_arr});
+      });
+
+      Report.get('getWorkHourPerDay', {limit: 10, memberIdx: memberIdx}).then(function(r1){
+        var data_arr = [];
+
+        for(var i in r1){        
+          data_arr.push([Date.parse(r1[i].work_d), Number(r1[i].work_h)]);
+        }
+
+        SR.chart2.series[0].update({data: data_arr});
+      });
+
+      Report.get('getWorkHourPerProject', {memberIdx: memberIdx}).then(function(r1){
+        var data_arr = [];
+        for(var i in r1){        
+          data_arr.push({name:r1[i].ProjectName, y: Number(r1[i].sum_work_h)});
+        }
+        SR.pie1.series[0].update({data: data_arr});
+      });
+
+      Report.get('getWorkHourPerDayAndProject',{day: 10, memberIdx: memberIdx}).then(function(r1){
+        var data_obj = {};
+        var data_arr = [];
+        for(var i in r1){
+          if(!data_obj[r1[i].ProjectName]) data_obj[r1[i].ProjectName] = []
+          data_obj[r1[i].ProjectName].push([Date.parse(r1[i].work_d), Number(r1[i].work_h)]);
+        }        
+        for(var i in data_obj){
+          data_arr.push({name: i, data: data_obj[i]});
+          //SR.stack1.addSeries({name: i, data: data_obj[i]});
+        }
+        // chart render
+        // 적층형 차트라 다른 차트들처럼 update로 처리할수가없어서 변경함
+        SR.stack1(data_arr);
+      });
+      $('.highcharts-credits').remove();
+    }
   }
 
   $(function(){
+
+    //init
+    Report.get('getLevel').then(function(res){
+      if(res.level >= 3) SR.setMemberSelect();      
+    });
+    SR.renderStatistics();
+
     parent.fncResizeHeight(document);
-    var today = new Date();
-  
-    Report.get('getSumWorkHourFromMonth', {year: today.getFullYear(), month: today.getMonth()}).then(function(r1){
-      Report.get('getWorkDayCount', {year: today.getFullYear(), month: today.getMonth()}).then(function(r2){
-        Report.get('getWorkDayCountFromWeekend', {year: today.getFullYear(), month: today.getMonth()}).then(function(r3){
-          $('#last-month-work-h').text(r1.sum_work_h);
-          $('#last-month-report-d').text(r2. count_work_d);
-          $('#last-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));
-        });
-      });
-    });
-    Report.get('getSumWorkHourFromMonth', {year: today.getFullYear(), month: today.getMonth()+1}).then(function(r1){
-      Report.get('getWorkDayCount', {year: today.getFullYear(), month: today.getMonth()+1}).then(function(r2){
-        Report.get('getWorkDayCountFromWeekend', {year: today.getFullYear(), month: today.getMonth()+1}).then(function(r3){
-          $('#current-month-work-h').text(r1.sum_work_h);
-          $('#current-month-report-d').text(r2. count_work_d);
-          $('#current-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));          
-        });
-      });
-    });
-
-    Report.get('getSumWorkHourFromRecentMonth', {limit: 12}).then(function(r1){
-      var data_arr = [];
-
-      for(var i in r1){        
-        data_arr.push([Date.parse(r1[i].year+'-'+r1[i].month), Number(r1[i].sum_work_h)]);
-      }
-      SR.chart1.series[0].update({data: data_arr});
-    });
-
-    Report.get('getWorkHourPerDay', {limit: 14}).then(function(r1){      
-      var data_arr = [];
-
-      for(var i in r1){        
-        data_arr.push([Date.parse(r1[i].work_d), Number(r1[i].work_h)]);
-      }
-
-      SR.chart2.series[0].update({data: data_arr});
-    });
-
-    Report.get('getWorkHourPerProject').then(function(r1){      
-      var data_arr = [];
-      for(var i in r1){        
-        data_arr.push({name:r1[i].ProjectName, y: Number(r1[i].sum_work_h)});
-      }
-      SR.pie1.series[0].update({data: data_arr});
-    });
-    $('.highcharts-credits').remove();
   });
 </script>
 </body>
