@@ -232,7 +232,7 @@ var MM = {
           MM.searchMember();
           Report.alert('변경되었습니다.');
         }else{
-          Report.alert('error: 1'+ res.error);
+          Report.alert('error: '+ res.error);
         }
       });
     });

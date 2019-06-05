@@ -107,15 +107,16 @@
       var list = $('.status-list tbody');
       var unreported = [];
       var html = '';
+      
       for(var date in rows) {
-        if(rows[date].day==='토' || rows[date].day==='일'){
+        if(rows[date].day==='토' || rows[date].day==='일' || rows[date].isHoliday==="Y"){
           // 토, 일요일은 display:none 이 기본이다
           // 주말 보고서를 제출한 사람이 있을경우에는 보이게한다
           // rows[date].reported.length 가 1보다 작으면 제출된 보고서가 없는것으로 판단한다.
           html +='<tr class="bg-lightpink weekend '+ (rows[date].reported.length<1 ? 'd-n' : '') +'">\
                     <td class="ta-c">'+ date + ' ' +rows[date].day +'요일</td>\
                     <td>'+ rows[date].reported +'</td>\
-                    <td></td>\
+                    <td>'+ (rows[date].dateName ? rows[date].dateName : '주말') +'</td>\
                   </tr>';
         }else{
           html +='<tr>\

@@ -130,6 +130,12 @@ var Report = {
                 </div>');
     $('body').append(modal);
     $(modal).show();
+
+    //event
+    $(modal).find('.modal-footer a:eq(0)').keyup(function(e){
+      console.log(e);
+      Report.closeModal();
+    });
   },
   //confirm, 콜백 받아서 boolean 넣고 실행
   confirm: function(msg, callback){
@@ -158,9 +164,24 @@ var Report = {
       Report.closeModal();
     });    
   },
+  //loading 창
+  loading: function(){
+    var modal = $('<div class="overlay boardtype2 loading">\
+                  <div class="modal-div w-200">\
+                    <div class="modal-header">\
+                    </div>\
+                    <div class="modal-content">잠시만 기다려주세요...</div>\
+                    <div class="modal-footer mt-20">\
+                    </div>\
+                  </div>\
+                </div>');
+    $('body').append(modal);
+    $(modal).show();
+  },
   // 창닫기, 공통
   closeModal: function() {
     $('.alert').remove();
     $('.confirm').remove();
+    $('.loading').remove();
   },
 }

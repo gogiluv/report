@@ -114,6 +114,7 @@
                         <li><a href="javascript:OpenURL('introEco.php');">ECO 팀 ?!</a></li>
                         <li><a href="javascript:OpenURL('main.php');">공지 사항</a></li>
                         <li><a href="javascript:OpenURL('addReport.php');">주간 보고(일별)</a></li>
+                        <li><a href="javascript:OpenURL('holiday.php');">공휴일 관리</a></li>
                         <?php 
                             }
                         ?>

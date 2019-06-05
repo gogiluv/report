@@ -96,7 +96,6 @@
   </div>
 </div>
 <script type="text/javascript">
-
  var PM = {
   renderRow: function(rows, tab_name){
     var list = $('.tabcontents.'+tab_name+' tbody');

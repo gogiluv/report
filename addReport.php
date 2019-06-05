@@ -41,7 +41,7 @@
                   <label for="work-hour">근무시간</label>
                   <input type="number" id="work-hour" value="0.00" step="0.10" min="0" max="24" onchange="AddReport.toTime(this)"/>
                 </span>
-                <span>(n시간 n분)</span>
+                <span>(0시간 0분)</span>
                 <!-- <span>
                   <label for="work-hour">근무시간</label>
                   <input type="number" id="hour" value="0" step="1" min="0" max="23"/>시간

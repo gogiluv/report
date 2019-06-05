@@ -490,12 +490,15 @@
 			echo json_encode(array("error"=>"SESSION_EXPIRED"));
 			return;
     }
+
+    $link = DBConnect();
     
+    //get report
 		$report_sql = sprintf("SELECT em.MemberName, er.work_d, year(er.work_d) as year, month(er.work_d) as month 
-    from ECO_Reports as er inner join ECO_Member as em on er.MemberIdx=em.MemberIdx 
+    from ECO_Reports as er 
+    inner join ECO_Member as em on er.MemberIdx=em.MemberIdx
     GROUP by em.MemberName, er.work_d having work_d BETWEEN '%s' and '%s' order by er.work_d desc", $data['from'], $data['to']);
     
-    $link = DBConnect();
     $report_result = mysqli_query($link, $report_sql);
 
     //mysql error
@@ -518,6 +521,19 @@
       $member_arr[] = $member['membername'];
     }
 
+    //get holiday
+    $holiday_sql = sprintf("SELECT loc_date, date_name from ECO_Holiday 
+                            where loc_date BETWEEN '%s' and '%s' 
+                            order by loc_date asc", $data['from'], $data['to']);
+    $holiday_result = mysqli_query($link, $holiday_sql);
+
+    //mysql error
+    if(!$holiday_result) {
+      $holiday_result = mysqli_error($link);
+      return mysqli_result_to_json($holiday_result);
+    }
+
+
     $from = new DateTime($data['from']);
     $to = new DateTime($data['to']);
     $day = array("일","월","화","수","목","금","토");
@@ -528,6 +544,15 @@
     // }
 
     //날자 배열 세팅
+    /*
+    ex) 2019-05-01: {
+          reported:[홍길동, 철수, 영희],
+          unreported:[소닉, 피카츄, 라이츄],
+          day: '수요일',
+          isHoliday: Y
+          dateName: '근로자의날'
+        }
+    */
     for($from; $from<=$to; date_modify($from, '+1 day')){
       $reported_arr[date_format($from, 'Y-m-d')] = array('reported'=>[], 'unreported'=>[], 'day'=> $day[date_format($from, 'w')]);
     }
@@ -549,6 +574,11 @@
       }else{
         $reported_arr[$key]['unreported'] = $member_arr;
       }
+    }
+    //set holiday
+    while ( $row = $holiday_result->fetch_assoc()) {      
+      $reported_arr[$row['loc_date']]['isHoliday'] = "Y";
+      $reported_arr[$row['loc_date']]['dateName'] = $row['date_name'];
     }
 
     mysqli_close($link);
@@ -1016,8 +1046,8 @@
       return json_encode(array("error"=>"파트 누락"));
     }else if(empty($data['positionIdx'])){
       return json_encode(array("error"=>"직급 누락"));
-    }else if(empty($data['visible'])){
-      return json_encode(array("error"=>"상태 누락"));
+    }else if(is_null($data['visible'])){
+      return json_encode(array("error"=>"상태 누락 "));
     }else if(empty($data['levelIdx'])){
       return json_encode(array("error"=>"레벨 누락"));
     }else if(empty($data['EN'])){
@@ -1053,7 +1083,7 @@
       return json_encode(array("error"=>"파트 누락"));
     }else if(empty($data['positionIdx'])){
       return json_encode(array("error"=>"직급 누락"));
-    }else if(empty($data['visible'])){
+    }else if(is_null($data['visible'])){
       return json_encode(array("error"=>"상태 누락"));
     }else if(empty($data['levelIdx'])){
       return json_encode(array("error"=>"레벨 누락"));
@@ -1109,6 +1139,132 @@
 
     mysqli_close($link);
     return json_encode(array("result"=>$delete_result));
+  }
+
+  function getHolidays_bak($data){
+    $ch = curl_init();
+    $year = $data['year'];
+    $month = $data['month'];
+    $url = 'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo'; /*URL*/
+    $queryParams = '?' . urlencode('ServiceKey') . '=uTHUN5ZrJcJvmr2dO%2FVhXt%2BEZf2bDxVJTh%2F%2B8fcE1qFFEbpRiBY%2BVEP2oPl%2FctiNJQorvG%2F6N%2FlY%2FmO%2FTA2csA%3D%3D'; /*Service Key*/
+    $queryParams .= '&' . urlencode('solYear') . '=' . urlencode(2019); /*연*/
+    $queryParams .= '&' . urlencode('solMonth') . '=' . urlencode('05'); /*월*/
+    
+    curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    //var_dump($response);
+    $xml_data = simplexml_load_string($response);
+
+    /*
+    $items = $xml_data->body->items->item;
+    $data_arr = array();
+    
+    foreach ($items as $item) {
+      $json = json_encode($item);
+      $array = json_decode($json,TRUE);
+      $data_arr[] = $array;
+    }
+    return json_encode($data_arr);
+    */
+    $items = $xml_data->body->items;
+    return json_encode($items);
+  }
+
+  function getHolidaysWithAPI($data){
+    $ch = curl_init();
+    $year = $data['year'];
+    $month = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+    $holiday_list = [];
+    //1~12월까지 반복
+    foreach($month as $mon){
+      $url = 'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo'; /*URL*/
+      $queryParams = '?' . urlencode('ServiceKey') . '=uTHUN5ZrJcJvmr2dO%2FVhXt%2BEZf2bDxVJTh%2F%2B8fcE1qFFEbpRiBY%2BVEP2oPl%2FctiNJQorvG%2F6N%2FlY%2FmO%2FTA2csA%3D%3D'; /*Service Key*/
+      $queryParams .= '&' . urlencode('solYear') . '=' . urlencode($year); /*연*/
+      $queryParams .= '&' . urlencode('solMonth') . '=' . urlencode($mon); /*월*/
+      
+      curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($ch, CURLOPT_HEADER, FALSE);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+      $response = curl_exec($ch);
+      $xml_data = simplexml_load_string($response);
+      //$items = $xml_data->body->items;
+      $items = $xml_data->body->items->item;
+
+      //각월의 공휴일을 $result_list에 넣는다.
+      foreach ($items as $item) {
+        $holiday_list[] = $item;
+      }
+    }
+    curl_close($ch);
+
+    return json_encode($holiday_list);
+  }
+
+  function insertHoliday($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+		$sql = "INSERT INTO ECO_Holiday (loc_date, date_name) values ";
+	
+		/*
+		싱클쿼터('), 더블쿼터(") 사용을 위해 addslashes를 적용할 필요가 있음
+		row가 여러개니 벌크로 insert 한다
+		위의 이유로 sprint로 sql을 만들어서 쿼리한다
+		*/
+		$str_format = "('%s', '%s'), ";
+		foreach($data as $row){      
+		  $sql .= sprintf($str_format, $row["loc_date"], $row["date_name"]);
+		}
+    $sql = substr($sql, 0, strlen($sql) - 2);
+    
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+
+    mysqli_close($link);
+    return json_encode(array("result"=>$result));
+  }
+
+  function getHolidays($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $sql = sprintf("SELECT * from ECO_Holiday where year(loc_date)='%s' order by loc_date asc", $data['year']);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return mysqli_result_to_json($result);
+  }
+
+  function deleteHoliday($data){
+    if(SessionCheck() == false) {
+			echo json_encode(array("error"=>"SESSION_EXPIRED"));
+			return;
+    }
+
+    $sql = sprintf("DELETE from ECO_Holiday where id=%d", $data['id']);
+    $link = DBConnect();
+    $result = mysqli_query($link, $sql);
+    //mysql error
+    if(!$result) $result = mysqli_error($link);
+    mysqli_close($link);
+
+    return json_encode(array("result"=>$result));
   }
 
 ?>

@@ -224,19 +224,19 @@ input::-webkit-credentials-auto-fill-button {
     overflow: auto;
     white-space: pre-wrap;    
 }
-.alert, .confirm {
+.alert, .confirm, .loading {
     text-align: center;
 }
-.alert .modal-div, .confirm .modal-div {
+.alert .modal-div, .confirm .modal-div, .loading .modal-div {
     font-size: 20px;
     min-height: 0px;
     width: 400px;
     left:30%;
 }
-.alert .modal-content, .confirm .modal-content {
+.alert .modal-content, .confirm .modal-content, .loading .modal-content {
     font-size: 15px;   
 }
-.alert .modal-footer, .confirm .modal-footer {
+.alert .modal-footer, .confirm .modal-footer, .loading .modal-footer {
     font-size: 15px;   
 }
 

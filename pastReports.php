@@ -221,7 +221,7 @@
         project_id: $(row).find('td:eq(1) > select option:selected').val(),
         content: $(row).find('textarea').val()
       }
-      Report.get("updateReport", data).then(function(res){
+      Report.post("updateReport", data).then(function(res){
         if(res.result){
           PR.resetForm(id);
         }
