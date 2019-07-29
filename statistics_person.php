@@ -39,9 +39,9 @@
     </script>
 
     <title>ECO팀 업무보고 - 업무 취합</title>
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
+    <link rel="stylesheet" href="/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="/css/ui.css" type="text/css" />
+    <link rel="stylesheet" href="/css/button.css" type="text/css" />
 </head>
 <body onload="return resize()">
     <form id="form1" runat="server">
@@ -148,9 +148,9 @@
     </div>
     </form>
 
-    <script type="text/javascript" src="http://manager.com2us.com/guide/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
 
-    <script type="text/javascript" src="http://manager.com2us.com/guide/js/ui.js"></script>
+    <script type="text/javascript" src="/js/ui.js"></script>
 
     <script type="text/javascript">
                     //<![CDATA[

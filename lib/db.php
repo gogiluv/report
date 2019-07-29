@@ -4,8 +4,8 @@
 	function DBConnect()
 	{
 		
-		// $link = @mysqli_connect('localhost', 'eco', '36Mw@c=vfg');		
-		$link = @mysqli_connect('localhost', 'report_admin', 'q1w2e3r4!@');
+		$link = @mysqli_connect('localhost', 'eco', '36Mw@c=vfg');		
+		//$link = @mysqli_connect('localhost', 'report_admin', 'q1w2e3r4!@');
 		if (!$link)
 			// die('Could not connect: ' . mysqli_error());
 			die('Could not connect: ' . mysqli_connect_error());

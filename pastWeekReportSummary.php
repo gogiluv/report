@@ -119,9 +119,9 @@
     </script>
 
     <title>ECO팀 업무보고 - 업무 취합</title>
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
+    <link rel="stylesheet" href="/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="/css/ui.css" type="text/css" />
+    <link rel="stylesheet" href="/css/button.css" type="text/css" />
 </head>
 <body onload="resize()">
     <form id="form1" runat="server" method="GET">

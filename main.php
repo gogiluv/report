@@ -21,9 +21,9 @@
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>ECO 업무보고 사이트 </title>
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
+    <link rel="stylesheet" href="/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="/css/ui.css" type="text/css" />
+    <link rel="stylesheet" href="/css/button.css" type="text/css" />
     
      <script type="text/javascript">
 

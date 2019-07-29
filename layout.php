@@ -16,9 +16,14 @@
     <title>ECO팀 업무보고 사이트</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/layout.css" type="text/css" />
+
+    <!--<link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />-->
+    <!--<link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />-->
+    <!--<link rel="stylesheet" href="http://manager.com2us.com/guide/css/layout.css" type="text/css" />-->
+
+    <link rel="stylesheet" href="/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="/css/button.css" type="text/css" />
+    <link rel="stylesheet" href="/css/layout.css" type="text/css" />
 
     <script type="text/javascript">
         function fncResizeHeight(iframeWindow) {
@@ -131,7 +136,8 @@
             </div>
             <!-- 메뉴 열고닫기 -->
             <div class="C2SnavCtrl">
-                <a href="#"><img src="http://manager.com2us.com/guide/images/btn_close.gif" alt="" /></a>
+                <!--<a href="#"><img src="http://manager.com2us.com/guide/images/btn_close.gif" alt="" /></a>-->
+                <a href="#"><img src="/img/btn_close.gif" alt="" /></a>
             </div>
             <!-- //메뉴 열고닫기 -->
         </div>
@@ -146,7 +152,8 @@
     </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-    <script type="text/javascript" src="http://manager.com2us.com/guide/js/ui.js"></script>
+    <!--<script type="text/javascript" src="http://manager.com2us.com/guide/js/ui.js"></script>-->
+    <script type="text/javascript" src="/js/ui.js"></script>
 
     <script type="text/javascript">
             //<![CDATA[

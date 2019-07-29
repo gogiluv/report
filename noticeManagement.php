@@ -47,9 +47,9 @@
 
     <title>ECO 업무보고 - 공지사항관리 </title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
-    <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
+    <link rel="stylesheet" href="/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="/css/button.css" type="text/css" />
+    <link rel="stylesheet" href="/css/ui.css" type="text/css" />
 </head>
 <!-- 프로젝트 관리 출력 부분-->
 <body onload="return resize()">

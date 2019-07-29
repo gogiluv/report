@@ -1,0 +1,13 @@
+@charset "utf-8";
+
+/* layout */
+.C2Swrap	 {min-width:760px; padding-left:170px; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bg_wrap.gif') repeat-y -170px top;}
+.C2Snav	 {width:170px; float:left; margin-left:-170px;}
+* html .C2Snav	 {position:relative; left:170px;}/* for IE6 */
+.C2Scontents	 {min-width:760px; width:100%; float:left;}
+
+.C2Snavclose	{min-width:920px; padding-left:10px; background:#fff;}
+.C2Snavclose .C2Snav	{display:none;}
+.C2Snavclose .C2Scontents	 {min-width:920px; width:100%; float:left;}
+.C2SnavCtrl	{position:absolute; top:0; left:158px;}
+.C2Snavclose .C2SnavCtrl	{left:0;}

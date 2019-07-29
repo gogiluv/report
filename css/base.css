@@ -1,0 +1,107 @@
+@charset "utf-8";
+
+/* base */
+html	{font-size:100.01%; -webkit-text-size-adjust:none;}
+body	 {margin:0; padding:0; font:normal 12px "애플고딕", AppleGothic, "맑은 고딕", Malgun Gothic, "돋움", dotum, "굴림체", GulimChe, Arial, Verdana, sans-serif; color:#333; background-color:#fff;}
+h1, h2, h3, h4, h5, h6, div, p, dl, dt, dd, ul, ol, li, form, fieldset, blockquote, address, table, thead, tbody, tfoot, tr, td, caption	{margin:0; padding:0;}
+h1, h2, h3, h4, h5, h6 {font-size:1em;}
+ul, ol	 {list-style:none;}
+img	{vertical-align:middle; border:0;}
+table	{width:100%; font-size:1em; border:0; border-collapse:collapse; border-spacing:0;}
+table caption	{display:none;}
+fieldset	{border:0;}
+legend {width:0; height:0; position:absolute; top:0; left:0; overflow:hidden; visibility:hidden; padding:0; margin:0; font-size:0; line-height:0;}
+select, input, textarea	{font:normal 12px "애플고딕", AppleGothic, "맑은 고딕", Malgun Gothic, "돋움", dotum, "굴림체", GulimChe, Arial, Verdana, sans-serif;  color:#333; vertical-align:middle;}
+a	{color:#333; text-decoration:none;}
+a:hover	{color:#cd2027; text-decoration:underline;}
+
+/* layout */
+body {float:left; min-width:100%; display:inline-block;}
+#C2Ssystem	{min-width:930px;}
+.C2Shead	 {min-width:100%; height:49px; border-top:2px solid #cd2027; border-bottom:1px solid #ddd;}
+.C2Swrap	 {min-width:590px; position:relative; padding-left:340px; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bg_wrap.gif') repeat-y left top;}
+.C2Swrap:after	{content:''; display:block; clear:both; visibility:hidden;}
+*+ html .C2Swrap	{display:inline-block;}/* for IE7 */
+* html .C2Swrap	{display:inline-block;}/* for IE6 */
+.C2Snav	 {width:340px; float:left; margin-left:-340px;}
+* html .C2Snav	 {position:relative; left:340px;}/* for IE6 */
+.C2Scontents	 {min-width:590px; width:100%; float:left;}
+
+.C2Snavclose	{min-width:920px; padding-left:10px; background:#fff;}
+.C2Snavclose .C2Snav	{display:none;}
+.C2Snavclose .C2Scontents	 {min-width:920px; width:100%; float:left;}
+.C2SnavCtrl	{position:absolute; top:0; left:328px;}
+.C2Snavclose .C2SnavCtrl	{left:0;}
+
+/* header */
+.C2Shead h1	 {width:320px; float:left; padding:15px 0 0 30px; font-size:16px; line-height:16px;}
+.C2Shead h1 strong	 {padding-left:30px;}
+.C2Shead .greeting	{float:left; padding-top:17px;}
+.C2Shead .greeting strong	{color:#cd2027; text-decoration:underline;}
+.C2Shead .greeting .date	 {font-size:11px; color:#999;}
+.C2Shead .users	{float:right; padding:12px 10px 0 0;}
+
+/* navigation */
+.C2Snav	{line-height:16px;}
+.C2Snav .depth1	{width:160px; float:left; padding:0 5px;}
+.C2Snav .depth1 ul	{padding:10px 0;}
+.C2Snav .depth1 ul li	{}
+.C2Snav .depth1 ul li a	{display:block; padding:6px 5px; border-bottom:1px dotted #ddd;}
+.C2Snav .depth1 ul li a:hover, .C2Snav .depth1 ul li.on a	{color:#cd2027; font-weight:bold; text-align:right; text-decoration:none; background:#eee;}
+.C2Snav .depth2	{width:160px; float:left; padding:0 5px;}
+.C2Snav .depth2 ul	{padding:10px 0;}
+.C2Snav .depth2 ul li	{}
+.C2Snav .depth2 ul li a	{display:block; padding:6px 0 6px 17px; border-bottom:1px dotted #ddd; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_close.gif') no-repeat left 50%;}
+.C2Snav .depth2 ul li a:hover	{color:#cd2027; font-weight:bold; text-decoration:none;}
+.C2Snav .depth2 ul li.open a	{background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_open.gif') no-repeat left 50%;}
+.C2Snav .depth2 ul li.on a	{color:#cd2027; font-weight:bold; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_close.gif') no-repeat left 50%;}
+.C2Snav .depth2 ul li.on a:hover	{}
+.C2Snav .depth2 ul li a:hover, .C2Snav .depth2 ul li.on a:hover	 {text-decoration:none;}
+.C2Snav ul.depth3	{display:none; padding:5px 0; border-bottom:1px solid #ddd;}
+.C2Snav .on ul.depth3	{display:block;}
+.C2Snav ul.depth3 li	 {}
+.C2Snav ul.depth3 li a, .C2Snav .on ul.depth3 li a, .C2Snav .open ul.depth3 li a	{display:block; padding:5px 0 5px 17px; font-weight:normal; color:#333; border-bottom:0; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_square.gif') no-repeat 12px 50%;}
+.C2Snav ul.depth3 li a:hover	{color:#333; font-weight:bold;}
+.C2Snav ul.depth3 li.on a	 {color:#000; font-weight:bold; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_square.gif') no-repeat 12px 50%;}
+
+.C2Snav ul.depth3 ul.depth4	 {padding:2px 0; border:0;}
+.C2Snav ul.depth3 ul.depth4 li a, .C2Snav .on ul.depth3 ul.depth4 li a, .C2Snav .open ul.depth3 ul.depth4 li a	{display:block; padding:2px 0 2px 22px; font-size:11px; font-weight:normal; color:#333; border-bottom:0; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_dash.gif') no-repeat 16px 50%;}
+.C2Snav ul.depth3 ul.depth4 li a:hover	{color:#333; font-weight:bold;}
+.C2Snav ul.depth3 ul.depth4 li.on a	 {color:#000; font-weight:bold; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_dash.gif') no-repeat 16px 50%;}
+
+.C2Snav .depth2 ul li.etc span	{display:block; padding:6px 0 6px 17px; border-bottom:1px dotted #ddd; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_admin.gif') no-repeat left 50%;}
+.C2Snav .depth2 ul li.etc ul.depth3	{display:block;}
+.C2Snav .depth2 ul li.etc ul.depth3 li span 	{display:block; padding:5px 0 5px 17px; font-weight:normal; color:#333; border-bottom:0; background:url('//image-glb.qpyou.cn/hiveone/shared_files/guide/images/bl_square.gif') no-repeat 12px 50%;}
+
+* html .C2Snav .depth1 ul li a	{height:1%;}/* for IE6 */
+* html .C2Snav .depth2 ul li a	{height:1%;}/* for IE6 */
+* html .C2Snav ul.depth3 li a	{height:1%;}/* for IE6 */
+* html .C2Snav ul.depth4 li a	{height:1%;}/* for IE6 */
+
+/* footer */
+.C2Sfoot	{min-width:100%; height:49px; clear:both; border-top:1px solid #ddd;}
+.C2Sfoot .copyright	{padding-top:20px; text-align:center; font-size:11px; color:#999; }
+.C2Sfoot .copyright strong	{color:#cd2027;}
+.C2Sfoot .copyright a	{color:#cd2027; text-decoration:underline;}
+
+/* login */
+#C2Slogin	{}
+#C2Slogin .C2Slogin	{width:350px; height:150px; margin:150px auto 0; padding:20px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; border:5px solid #ddd;}
+#C2Slogin .C2Sfoot	{padding-top:30px; border-top:0;}
+#C2Slogin .C2Slogin h1	{margin-bottom:20px; text-align:center;}
+#C2Slogin .C2Slogin p	{font-weight:bold; text-align:center;}
+#C2Slogin .C2Slogin .intext	{height:18px; line-height:18px; padding:0 5px; border:1px solid #ddd; border-radius:2px; -webkit-border-radius:2px; -moz-border-radius:2px;}
+#C2Slogin .C2Slogin fieldset	{position:relative; padding:15px 0 10px; margin-bottom:15px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #ddd;}
+#C2Slogin .C2Slogin .loginarea1 .field	{margin-bottom:5px;}
+#C2Slogin .C2Slogin .loginarea1 .field label	{width:85px; display:inline-block; padding-right:5px; text-align:right; color:#000; font-weight:bold;}
+#C2Slogin .C2Slogin .loginarea1 .field .intext	{width:151px;}
+#C2Slogin .C2Slogin .loginarea1 .field .inselect	{width:163px;}
+#C2Slogin .C2Slogin .loginarea1 .btns	{float:right; margin-top:-50px; padding-right:25px;}
+*+ html #C2Slogin .C2Slogin .loginarea1 .btns	{margin-top:-52px;}/* for IE7 */
+* html #C2Slogin .C2Slogin .loginarea1 .btns	{margin-top:-53px;}/* for IE6 */
+#C2Slogin .C2Slogin .loginarea1 .button	 {width:60px; height:46px; padding:0; text-align:center;}
+
+#C2Slogin .C2Slogin .loginarea2 .field	{margin-bottom:5px;}
+#C2Slogin .C2Slogin .loginarea2 .field label	{width:90px; display:inline-block; padding-right:5px; text-align:right; color:#000; font-weight:bold;}
+#C2Slogin .C2Slogin .loginarea2 .field .intext	{width:120px;}
+#C2Slogin .C2Slogin .loginarea2 .button	 {width:80px; padding-left:0; padding-right:0; text-align:center;}

@@ -15,8 +15,8 @@
 </script>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title> ECO 업무보고 사이트 </title>
-<link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
-<link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
+<link rel="stylesheet" href="/css/ui.css" type="text/css" />
+<link rel="stylesheet" href="/css/button.css" type="text/css" />
 </head>
 <body>
 <form id = "formChart" name="formChart" method="post" enctype="multipart/form-data">

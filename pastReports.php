@@ -26,8 +26,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="http://manager.com2us.com/guide/css/ui.css" type="text/css" />
-  <link rel="stylesheet" href="http://manager.com2us.com/guide/css/button.css" type="text/css" />
+  <link rel="stylesheet" href="/css/ui.css" type="text/css" />
+  <link rel="stylesheet" href="/css/button.css" type="text/css" />
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="css/common.css">    
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
