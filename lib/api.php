@@ -779,10 +779,17 @@
     //$memberIdx = $_SESSION['report_login_userIdx'];
     $year = $data['year'];
     $month = $data['month'];
-
+		/*
     $sql = sprintf("SELECT count(work_d) as count_work_d from (SELECT work_d from ECO_Reports 
                     where MemberIdx=%d and year(work_d)=%d and month(work_d)=%d and dayofweek(work_d) in (1,7) 
                     group by work_d) as report_date", $memberIdx, $year, $month);
+		*/
+		// 기존에는 주말만 카운트 했었음. 공휴일을 추가한다
+    $sql = sprintf("SELECT count(work_d) as count_work_d from 
+									(SELECT work_d from ECO_Reports where MemberIdx=%d and 
+									(year(work_d)=%d and month(work_d)=%d and dayofweek(work_d) in (1,7) or work_d in 
+									(SELECT loc_date FROM ECO_Holiday WHERE year(loc_date)=%d and month(loc_date)=%d)) 
+									group by work_d) as report_date", $memberIdx, $year, $month, $year, $month);
     $link = DBConnect();
     $result = mysqli_query($link, $sql);
     //mysql error

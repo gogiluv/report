@@ -57,7 +57,7 @@
           </tr>
         </thead>
       </table>
-      <div style="padding:5px;">평균 = 근무시간 / (보고일 - 주말)</div>
+      <div style="padding:5px;">평균 = 근무시간 / (보고일 - 주말,공휴일)</div>
     </div>
     <div class="chart-area mt-20" style="width:800px;">
       <div id="pie1"></div>
@@ -319,7 +319,7 @@
             if(r1==null || r1.error) return;
             
             $('#last-month-work-h').text(r1.sum_work_h);
-            $('#last-month-report-d').text(r2. count_work_d);
+            $('#last-month-report-d').text(r2. count_work_d+' (주말, 공휴일: '+r3.count_work_d+')');
             $('#last-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));
           });
         });
@@ -334,7 +334,7 @@
             if(r1==null || r1.error) return;
 
             $('#current-month-work-h').text(r1.sum_work_h);
-            $('#current-month-report-d').text(r2. count_work_d);
+            $('#current-month-report-d').text(r2. count_work_d+' (주말, 공휴일: '+r3.count_work_d+')');
             $('#current-month-avg').text(Number(r1.sum_work_h/(r2.count_work_d-r3.count_work_d)).toFixed(2));          
           });
         });
