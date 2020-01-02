@@ -76,7 +76,7 @@
                 </td>
                 <th scope="col">공휴일 검색</th>
                 <td>
-                  <span><input type="button" class="button red" value="검색하기" onclick="HD.getHolidaysWithAPI()"></span> / 
+                  <span><input type="button" class="button red" value="검색하기" onclick="HD.getHolidays()"></span> / 
                   <span><input type="button" class="button green" value="추가하기" onclick="HD.addForm()"></span>
                   <!-- <span><input type="button" class="button red" value="임시저장" onclick="AddReport.draft()"></span> -->
                 </td>
@@ -178,7 +178,7 @@
 
       getHolidays: function(){
         var data = {
-          year: "2019"
+          year: $('#search-year').val()
         }
 
         //loading
@@ -224,7 +224,7 @@
             var year = row.locdate.substr(0,4);
             var month = row.locdate.substr(4,2);
             var day = row.locdate.substr(6,2);
-            var row_date = new Date(year, month, day);
+            var row_date = new Date(year, (month-1), day);
             var isHoliday = row.isHoliday;
 
             //관공서 휴일이 아닐경우 제외
