@@ -288,7 +288,7 @@
 		// 파트장님들은 해당 파트만 볼수있음
 		$partIdx = $_SESSION["report_login_partIdx"];
 		$part_sql = '';
-		if($partIdx!=1){ 
+		if($partIdx!=1 && $partIdx!=5){ 
 			$part_sql = "and em.partIdx=$partIdx"; 
 		}
 

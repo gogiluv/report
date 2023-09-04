@@ -96,25 +96,47 @@
 			            <?php
                             }                       
                             
-                            if ( $_SESSION["report_login_level"] >= 3 )
+                            if
+                            (
+                            $_SESSION["report_login_level"] == 3 )
                             {
                         ?>
                         <!-- <li><a href="javascript:OpenURL('thisWeekReportSummary.php');">이번주 업무 취합</a></li>
                         <li><a href="javascript:OpenURL('pastWeekReportSummary.php');">지난 업무 취합</a></li> -->
-                        <li><a href="javascript:OpenURL('statistics_project.php');">프로젝트별 통계</a></li>
-                        <li><a href="javascript:OpenURL('statistics_report.php');">업무보고 통계</a></li>    
-                        <li><a href="javascript:OpenURL('reportSummary.php');">업무 보고 취합</a></li>
-                        <li><a href="javascript:OpenURL('ReportingStatus.php');">보고 현황</a></li>
-                        <li><a href="javascript:OpenURL('projectManagement.php');">프로젝트 관리</a></li>                        
-                        <li><a href="javascript:OpenURL('memberManagement.php');">팀원 관리</a></li>
-                        <li><a href="javascript:OpenURL('noticeManagement.php');">공지사항 관리</a></li>                        
-                        
+												<li><a href="javascript:OpenURL('statistics_project.php');">프로젝트별 통계</a></li>
+												<li><a href="javascript:OpenURL('statistics_report.php');">업무보고 통계</a></li>    
+												<li><a href="javascript:OpenURL('reportSummary.php');">업무 보고 취합</a></li>
+												<li><a href="javascript:OpenURL('ReportingStatus.php');">보고 현황</a></li>
+                        <li><a href="javascript:OpenURL('addReport.php');">주간 보고(일별)</a></li>
+                        <li><a href="javascript:OpenURL('pastReports.php');">보고서 조회</a></li>
+			            <?php
+                            }                       
+                            
+                            if
+                            (
+                            $_SESSION["report_login_level"] == 4 )
+                            {
+                        ?>
+                        <!-- <li><a href="javascript:OpenURL('thisWeekReportSummary.php');">이번주 업무 취합</a></li>
+                        <li><a href="javascript:OpenURL('pastWeekReportSummary.php');">지난 업무 취합</a></li> -->
+												<li><a href="javascript:OpenURL('statistics_project.php');">프로젝트별 통계</a></li>
+												<li><a href="javascript:OpenURL('statistics_report.php');">업무보고 통계</a></li>    
+												<li><a href="javascript:OpenURL('reportSummary.php');">업무 보고 취합</a></li>
+												<li><a href="javascript:OpenURL('ReportingStatus.php');">보고 현황</a></li>
                         <?php
                             }   
                             
                             if( $_SESSION["report_login_level"] == 99 )
                             {
                         ?>
+
+												<li><a href="javascript:OpenURL('statistics_project.php');">프로젝트별 통계</a></li>
+												<li><a href="javascript:OpenURL('statistics_report.php');">업무보고 통계</a></li>    
+												<li><a href="javascript:OpenURL('reportSummary.php');">업무 보고 취합</a></li>
+												<li><a href="javascript:OpenURL('ReportingStatus.php');">보고 현황</a></li>
+												<li><a href="javascript:OpenURL('projectManagement.php');">프로젝트 관리</a></li>                        
+												<li><a href="javascript:OpenURL('memberManagement.php');">팀원 관리</a></li>
+												<li><a href="javascript:OpenURL('noticeManagement.php');">공지사항 관리</a></li>                        
                         <li><a href="javascript:OpenURL('pastReports.php');">보고서 조회(수정용)</a></li>
                         <li><a href="javascript:OpenURL('introEco.php');">ECO 팀 ?!</a></li>
                         <li><a href="javascript:OpenURL('main.php');">공지 사항</a></li>
