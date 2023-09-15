@@ -57,6 +57,13 @@
               <?php 
                 }
               ?>
+              <th>통계 유형</th>
+              <td>
+                <select id="type" onchange="SP.searchResult()">
+                  <option value='month' selected>월간</option>
+                  <option value='year'>연간</option>
+                </select>
+              </td>
               <th>년</th>
               <td>
                 <select id="year" onchange="SP.searchResult()">
@@ -104,13 +111,15 @@
     default_mym: {
       memberIdx: null,
       year: new Date().getFullYear(),
-      month: null //new Date().getMonth() + 1
+      month: null, //new Date().getMonth() + 1
+      type: 'month'
     },
     searchResult: function(){
       data = SP.default_mym;
       data.memberIdx = $('select[id=name]').val() || null;
       data.year = $('select[id=year]').val() || new Date().getFullYear();
       data.month = $('select[id=month]').val() || null;
+      data.type = $('select[id=type]').val() || 'month';
 
       Report.post('getStatisticsProject', data).then(function(res){        
         SP.renderRows(res);

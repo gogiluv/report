@@ -711,9 +711,10 @@
     $sql = sprintf("SELECT * from (SELECT year(work_d) as year, 
                     month(work_d) as month, sum(work_h) as sum_work_h
                     FROM ECO_Reports where MemberIdx=%d
-                    group by year(work_d), month(work_d) 
-                    order by work_d desc limit %d) as A
+                    group by year(work_d), month(work_d)
+                    order by month desc limit %d) as A
                     order by year, month asc", $memberIdx, $limit);
+    
     $link = DBConnect();    
     $result = mysqli_query($link, $sql);    
     //mysql error
@@ -896,15 +897,16 @@
                     FROM ECO_Reports as er 
                     inner join ECO_Project as ep on er.ProjectIdx = ep.ProjectIdx 
                     WHERE er.memberidx=%d and er.work_d >= (DATE('%s')-INTERVAL %d DAY)  
-                    group by er.ProjectIdx, er.work_d 
+                    group by er.ProjectIdx, er.work_d, er.work_h 
                     order by er.work_d asc",$memberIdx, $latest_work_d, $day);
-    
+
+        
     $result = mysqli_query($link, $sql);
     //mysql error
     if(!$result) $result = mysqli_error($link);
     mysqli_close($link);
 
-    return mysqli_result_to_json($result);    
+    return mysqli_result_to_json($result);
   }
 
   //프로젝트 관리
