@@ -246,7 +246,7 @@
     $partIdx = $_SESSION["report_login_partIdx"];
     
     $part_sql = '';
-    if($partIdx!=1){ $part_sql = sprintf("and partIdx=%d", $partIdx); }
+    if($partIdx!=1 && $partIdx!=5){ $part_sql = sprintf("and partIdx=%d", $partIdx); }
 
     $sql = sprintf("SELECT * FROM ECO_Member where visible=1 and levelidx < 3 %s order by memberidx", $part_sql);
     
@@ -711,8 +711,8 @@
     $sql = sprintf("SELECT * from (SELECT year(work_d) as year, 
                     month(work_d) as month, sum(work_h) as sum_work_h
                     FROM ECO_Reports where MemberIdx=%d
-                    group by year(work_d), month(work_d)
-                    order by month desc limit %d) as A
+                    group by year(work_d), month(work_d) 
+                    order by year(work_d) desc, month(work_d) limit %d) as A
                     order by year, month asc", $memberIdx, $limit);
     
     $link = DBConnect();    
@@ -897,7 +897,7 @@
                     FROM ECO_Reports as er 
                     inner join ECO_Project as ep on er.ProjectIdx = ep.ProjectIdx 
                     WHERE er.memberidx=%d and er.work_d >= (DATE('%s')-INTERVAL %d DAY)  
-                    group by er.ProjectIdx, er.work_d, er.work_h 
+                    group by er.ProjectIdx, er.work_d, er.work_h
                     order by er.work_d asc",$memberIdx, $latest_work_d, $day);
 
         
