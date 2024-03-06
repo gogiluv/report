@@ -287,9 +287,13 @@
         html.push('<tr class="sum">');        
         html.push('<td>합계</td>');
         html.push('<td colspan=3></td>');
-        html.push('<td>'+common_mm[i].toFixed(2)+'</td>');
+        html.push('<td>');
+        html.push(common_mm[i]? common_mm[i].toFixed(2): '');
+        html.push('</td>');        
         html.push('<td></td>');
-        html.push('<td>'+game_mm[i].toFixed(2)+'</td>');
+        html.push('<td>');
+        html.push(game_mm[i]? game_mm[i].toFixed(2): '')
+        html.push('</td>');        
         html.push('</tr>');
 
         $('tr[data-date='+i+']').last().after(html.join(''));
