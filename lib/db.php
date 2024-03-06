@@ -305,6 +305,7 @@
 		if(!$result) $result = mysqli_error($link);
 		
 		mysqli_close($link);
+
     return mysqli_result_to_json($result);
 	}
 	

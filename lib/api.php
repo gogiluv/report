@@ -386,7 +386,7 @@
 		}
 
 		$sql = "SELECT er.projectidx, year(er.work_d) as year, month(er.work_d) as month, 
-		sum(er.work_h) as hour, ep.projectname 
+		sum(er.work_h) as hour, ep.projectname, ep.isgame 
 		from ECO_Reports as er 
 		inner join ECO_Project as ep on er.projectidx = ep.ProjectIdx 
 		$member_sql 

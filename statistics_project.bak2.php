@@ -34,7 +34,7 @@
     <div>
     <div class="boardtype2" style="width:auto; max-width:1500px;">
       <div class="select-area">
-        <table style="width:300px;">
+        <table style="width:500px;">
           <thead>
             <tr>
               <?php
@@ -57,14 +57,14 @@
               <?php 
                 }
               ?>
-              <!-- <th>통계 유형</th>
+              <th>통계 유형</th>
               <td>
                 <select id="type" onchange="SP.selectType()">
                   <option value='month' selected>월간</option>
                   <option value='year'>연간</option>
                   <option value='period'>기간</option>
                 </select>
-              </td> -->
+              </td>
               <th>년</th>
               <td>
                 <select id="year" onchange="SP.searchResult()">
@@ -91,26 +91,17 @@
         </table>        
       </div>
       
-      <div class="sp-list mt-20" style="width:900px;">
+      <div class="sp-list mt-20" style="width:800px;">
         <table>
           <thead>
             <tr>
-              <th width="10%" rowspan="3">월</th>
-              <th rowspan="3">프로젝트명</th>
-              <th width="12%" rowspan="3">업무 시간</th>
-              <th width="12%" rowspan="3">업무 시간 비율</th>
-              <th width="40%" colspan="4">프로젝트 투입시간</th>
-            </tr>
-            <tr>            
-              <th width="20%" colspan="2">공통</th>
-              <th width="20%" colspan="2">게임</th>
-            </tr>
-            <tr>            
-              <th width="10%">시간</th>
-              <th width="10%">비율</th>
-              <th width="10%">시간</th>
-              <th width="10%">비율</th>
-            </tr>        
+              <th width="10%">월</th>
+              <th>프로젝트명</th>
+              <th width="15%">업무 시간</th>
+              <th width="15%">업무 시간 비율</th>
+              <th width="16%">프로젝트 투입시간</th>
+              <th width="15%">프로젝트 투입률</th>
+            </tr>            
           </thead>
           <tbody>
           </tbody>
@@ -132,18 +123,18 @@
       data.memberIdx = $('select[id=name]').val() || null;
       data.year = $('select[id=year]').val() || new Date().getFullYear();
       data.month = $('select[id=month]').val() || null;
-      //data.type = $('select[id=type]').val() || 'month';
+      data.type = $('select[id=type]').val() || 'month';
 
       Report.post('getStatisticsProject', data).then(function(res){        
         SP.renderRows(res);
       });
     },
-    // selectType: function() {
-    //   console.log('selectType');
-    //   data.type = $('select[id=type]').val() || 'month';
-    //   console.log(data);
+    selectType: function() {
+      console.log('selectType');
+      data.type = $('select[id=type]').val() || 'month';
+      console.log(data);
 
-    // },
+    },
     renderPeriodBox: function() {
       var html = `
       <td>
@@ -159,32 +150,15 @@
     renderRows: function(rows){
       //console.log(rows);
       var list = $('.sp-list tbody');
-      var work_h_sum ={}; //월별 업무시간 합계      
-      var project_h_sum ={}; //월별 프로젝트 투입시간 합계
-      var game_mm = {};  //game man month
-      var common_mm = {}; //common man month
+      var work_h_sum ={}; //월별 업무시간 합계
 
       list.html(''); //초기화
-
-      // 시간 합산용
-      for(var num in rows){
-        var row = rows[num];
-        if(work_h_sum[row.month]) { work_h_sum[row.month] += Number(row.hour); }
-        else { work_h_sum[row.month] = Number(row.hour); }
-                
-        // 연차 제외한 순수 근무시간
-        if(row.projectidx!=12){
-          if(project_h_sum[row.month]) { project_h_sum[row.month] += Number(row.hour); }
-          else { project_h_sum[row.month] = Number(row.hour); }
-        }
-      }
-
       for(var num in rows){
         var html = [];        
-        var row = rows[num];
+        row = rows[num];
         var rendered = $('[data-date='+row.month+']');
 
-        html.push('<tr data-date='+row.month+' data-isgame='+row.isgame+'>');
+        html.push('<tr data-date='+row.month+'>');
         if(rendered.length == 0) {
           html.push('<th>');
           //html.push((new Date(row.work_d).getMonth()+1)+'월');
@@ -193,7 +167,6 @@
         } else {
           rendered.first().find('th:first').attr('rowspan', rendered.length + 1);
         }
-
         html.push('<td>');
         html.push(row.projectname);
         html.push('</td>');
@@ -201,103 +174,45 @@
         html.push(Number(row.hour));
         html.push('</td>');
         html.push('<td>');
-        html.push(((parseFloat(row.hour)/work_h_sum[row.month])*100).toFixed(2)+'%');
         html.push('</td>');
-
-        /*
-          게임과 그외(공통)의 프로젝트를 구분
-          연차는 man month 계산에서 제외한다(projectidx 12 가 연차임)
-        */
-
-        if(row.isgame==0 && row.projectidx!=12) {
-          var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
-                    //man month 합산          
-          if(common_mm[row.month]) { common_mm[row.month] += mm; }
-          else { common_mm[row.month] = mm; }
-
-          html.push('<td data-common-h='+row.hour+'>');
-          html.push(Number(row.hour));
-          html.push('</td>');
-          html.push('<td>');            
-          html.push(mm);
-          html.push('</td>');   
-        } else {
-          html.push('<td></td>');
-          html.push('<td></td>');
-        }
-
-        // if(rendered.length == 0) {
-        //   html.push('<td></td>');
-        // } else {
-        //   rendered.first().find('td:eq(4)').attr('rowspan', rendered.length + 1);
-        // }
-
-
-        if(row.isgame==1 && row.projectidx!=12) {
-          //var mm = Math.ceil(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
-          var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
-          
-          //man month 합산
-          if(game_mm[row.month]) { game_mm[row.month] += mm; }
-          else { game_mm[row.month] = mm; }
-
-          html.push('<td data-game-h='+row.hour+'>');
-          html.push(Number(row.hour));
-          html.push('</td>');
-          html.push('<td>');            
-          html.push(mm);
-          html.push('</td>');
-        } else {
-          html.push('<td>');
-          html.push('</td>');
-          html.push('<td>');
-          html.push('</td>');  
-        }
-        // html.push('<td>');
-        // html.push('</td>');        
+        html.push('<td data-work-h='+row.hour+'>');
+        html.push(Number(row.hour));
+        html.push('</td>');
+        html.push('<td>');
+        html.push('</td>');        
         html.push('</tr>');
         list.append(html.join(''));
 
+        if(work_h_sum[row.month]) { work_h_sum[row.month] += Number(row.hour); }
+        else { work_h_sum[row.month] = Number(row.hour); }
+
         parent.fncResizeHeight(document);
-      }      
-      
-      
-      // //월별 업무시간 비율계산
-      // for(var i=0; i<$('tr[data-date]').length; i++){
-      //   row = $('tr[data-date]')[i];
-      //   var month = $(row).attr('data-date');
-      //   var work_h = $(row).find('td[data-work-h]').attr('data-work-h');
-
-      //   // 0/0 처리
-      //   if(work_h == 0) {$(row).find('td:eq(2)').text('0.00%'); continue;}
-
-      //   //$(row).find('td:eq(2)').text(((parseFloat(work_h)/work_h_sum[month])*100).toFixed(2)+'%');
-      // }
-      SP.sumWorkHour(game_mm, common_mm);
-    },
-
-    sumWorkHour: function(game_mm, common_mm){
-      let month_concat = Object.keys(game_mm).concat(Object.keys(common_mm))
-      let month = month_concat.filter((m, i)=> month_concat.indexOf(m)===i);      
-
-      for(let i of month) {
-        let html = [];
-        let month_length = $('tr[data-date='+i+']').length;
-      
-        html.push('<tr class="sum">');        
-        html.push('<td>합계</td>');
-        html.push('<td colspan=3></td>');
-        html.push('<td>'+common_mm[i].toFixed(2)+'</td>');
-        html.push('<td></td>');
-        html.push('<td>'+game_mm[i].toFixed(2)+'</td>');
-        html.push('</tr>');
-
-        $('tr[data-date='+i+']').last().after(html.join(''));
-        $('tr[data-date='+i+']').first().find('th:first').attr('rowspan', month_length + 1)
       }
 
-      $('.sum td').css('background-color', 'lightyellow');
-    },
+      //월별 업무시간 비율계산
+      for(var i=0; i<$('tr[data-date]').length; i++){
+        row = $('tr[data-date]')[i];
+        var month = $(row).attr('data-date');
+        var work_h = $(row).find('td[data-work-h]').attr('data-work-h');
+
+        // 0/0 처리
+        if(work_h == 0) {$(row).find('td:eq(2)').text('0.00%'); continue;}
+
+        $(row).find('td:eq(2)').text(((parseFloat(work_h)/work_h_sum[month])*100).toFixed(2)+'%');
+      }
+
+      //월별 프로젝트 투입시간 비율계산
+      for(var i=0; i<$('tr[data-date]').length; i++){
+        row = $('tr[data-date]')[i];
+        var month = $(row).attr('data-date');
+        var work_h = $(row).find('td[data-work-h]').attr('data-work-h');
+
+        // 0/0 처리
+        if(work_h == 0) {$(row).find('td:last').text('0.00%'); continue;}
+
+        $(row).find('td:last').text(((parseFloat(work_h)/work_h_sum[month])*100).toFixed(2)+'%');
+      }
+    }
   }
 
   $(function(){
