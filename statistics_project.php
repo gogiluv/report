@@ -210,32 +210,33 @@
         */
 
         if(row.isgame==0 && row.projectidx!=12) {
-          var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
-                    //man month 합산          
+          //var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
+          var mm = Math.floor(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
+          //man month 합산
           if(common_mm[row.month]) { common_mm[row.month] += mm; }
           else { common_mm[row.month] = mm; }
 
           html.push('<td data-common-h='+row.hour+'>');
           html.push(Number(row.hour));
           html.push('</td>');
-          html.push('<td>');            
-          html.push(mm);
-          html.push('</td>');   
+          // html.push('<td>');            
+          // html.push(mm);
+          // html.push('</td>');
         } else {
           html.push('<td></td>');
-          html.push('<td></td>');
+          // html.push('<td></td>');
         }
 
-        // if(rendered.length == 0) {
-        //   html.push('<td></td>');
-        // } else {
-        //   rendered.first().find('td:eq(4)').attr('rowspan', rendered.length + 1);
-        // }
+        if(rendered.length == 0) {
+          html.push('<td></td>');
+        } else {
+          rendered.first().find('td:eq(4)').attr('rowspan', rendered.length + 1);
+        }
 
 
         if(row.isgame==1 && row.projectidx!=12) {
-          //var mm = Math.ceil(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
-          var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
+          var mm = Math.ceil(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
+          //var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
           
           //man month 합산
           if(game_mm[row.month]) { game_mm[row.month] += mm; }
@@ -288,7 +289,10 @@
         html.push('<td>합계</td>');
         html.push('<td colspan=3></td>');
         html.push('<td>');
-        html.push(common_mm[i]? common_mm[i].toFixed(2): '');
+        //html.push(common_mm[i]? common_mm[i].toFixed(2): '');
+        // 게임 프로잭트 투입 시간이 있으면 공통은 "1 - 게임MM" 으로 계산한다
+        // 게임 프로잭트 투입시간이 없으면 공통MM 기입
+        html.push(game_mm[i]? (1 - game_mm[i]).toFixed(2): 1);
         html.push('</td>');        
         html.push('<td></td>');
         html.push('<td>');
