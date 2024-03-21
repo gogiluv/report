@@ -173,10 +173,12 @@
         else { work_h_sum[row.month] = Number(row.hour); }
                 
         // 연차 제외한 순수 근무시간
-        if(row.projectidx!=12){
-          if(project_h_sum[row.month]) { project_h_sum[row.month] += Number(row.hour); }
-          else { project_h_sum[row.month] = Number(row.hour); }
-        }
+        // if(row.projectidx!=12){
+        //   if(project_h_sum[row.month]) { project_h_sum[row.month] += Number(row.hour); }
+        //   else { project_h_sum[row.month] = Number(row.hour); }
+        // }
+        if(project_h_sum[row.month]) { project_h_sum[row.month] += Number(row.hour); }
+        else { project_h_sum[row.month] = Number(row.hour); }
       }
 
       for(var num in rows){
@@ -206,10 +208,11 @@
 
         /*
           게임과 그외(공통)의 프로젝트를 구분
-          연차는 man month 계산에서 제외한다(projectidx 12 가 연차임)
+          연차는 man month 계산에서 제외한다(projectidx 12 가 연차임) - 삭제
+          20240321 연차도 포함하도록 수정
         */
 
-        if(row.isgame==0 && row.projectidx!=12) {
+        if(row.isgame==0) {
           //var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
           var mm = Math.floor(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
           //man month 합산
@@ -234,7 +237,7 @@
         }
 
 
-        if(row.isgame==1 && row.projectidx!=12) {
+        if(row.isgame==1) {
           var mm = Math.ceil(((parseFloat(row.hour)/project_h_sum[row.month]))*100)/100;
           //var mm = Number(((parseFloat(row.hour)/project_h_sum[row.month])).toFixed(2));
           
